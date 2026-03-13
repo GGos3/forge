@@ -1,0 +1,9 @@
+if [[ -n "${FORGE_SHELL_INTEGRATION_PATH-}" && -r "${FORGE_SHELL_INTEGRATION_PATH}" ]]; then
+  # shellcheck source=/dev/null
+  source "${FORGE_SHELL_INTEGRATION_PATH}"
+fi
+
+if [[ -r "${HOME}/.bashrc" ]]; then
+  # shellcheck source=/dev/null
+  source "${HOME}/.bashrc"
+fi
