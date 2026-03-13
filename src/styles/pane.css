@@ -1,0 +1,72 @@
+.forge-pane-terminal-wrapper {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  border: 1px solid transparent;
+}
+
+.forge-pane-terminal-wrapper[data-focused="true"] {
+  border: 1px solid var(--accent);
+}
+
+.forge-pane-terminal-wrapper[data-focused="false"] {
+  border: 1px solid var(--border);
+}
+
+.forge-pane-divider {
+  flex-basis: 2px;
+  flex-grow: 0;
+  flex-shrink: 0;
+  background-color: var(--border);
+  z-index: 10;
+  position: relative;
+}
+
+.forge-pane-divider::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+}
+
+.forge-pane-divider-vertical {
+  cursor: col-resize;
+}
+
+.forge-pane-divider-horizontal {
+  cursor: row-resize;
+}
+
+.forge-pane-divider[data-dragging="true"],
+.forge-pane-divider:hover {
+  background-color: var(--accent);
+}
+
+.forge-terminal-pane {
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  width: 100%;
+  height: 100%;
+}
+
+.forge-terminal-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.forge-terminal-error {
+  color: var(--error);
+}

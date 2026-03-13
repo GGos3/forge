@@ -1,0 +1,11 @@
+:root {
+  --bg-primary: #1e1e2e;
+  --bg-secondary: #27273a;
+  --bg-active: #313147;
+  --text-primary: #e0e0e6;
+  --text-secondary: #8888a0;
+  --accent: #7c5bf5;
+  --error: #ff5555;
+  --border: #3a3a52;
+  --block-divider: #2d2d44;
+}
