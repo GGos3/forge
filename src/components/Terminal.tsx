@@ -10,6 +10,7 @@ import type { SessionExitEvent, SessionId, SessionOutputEvent } from "../types/s
 import { BlockParser } from "../models/block-parser";
 import BlockOverlay, { BlockUiItem } from "./BlockOverlay";
 import { settingsStore } from "../stores/settings";
+import { getCurrentPlatform } from "../utils/platform";
 
 interface TerminalProps {
   sessionId: SessionId;
@@ -134,7 +135,9 @@ export default function Terminal(props: TerminalProps) {
     xterm.open(containerRef);
     xterm.loadAddon(fitAddon);
 
-    if (!import.meta.env.VITE_E2E) {
+    const platform = getCurrentPlatform();
+
+    if (!import.meta.env.VITE_E2E && platform !== "macos") {
       try {
         xterm.loadAddon(new WebglAddon());
       } catch {}
