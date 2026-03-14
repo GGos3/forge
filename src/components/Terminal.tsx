@@ -280,7 +280,7 @@ export default function Terminal(props: TerminalProps) {
         syncDebugState(undefined, undefined, undefined, event.payload.data.length);
 
         if (newBlockId && newBlockId !== prevBlockId && !blockStartRows.has(newBlockId)) {
-          blockStartRows.set(newBlockId, preWriteRow);
+          blockStartRows.set(newBlockId, Math.max(0, preWriteRow - 1));
         }
 
         updateBlocksUI();
