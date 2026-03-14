@@ -1,10 +1,17 @@
+mod known_hosts;
 use log::info;
 use tauri::Manager;
 
 mod commands;
+mod connection_store;
+mod credentials;
+mod explorer;
+mod git_status;
 mod session;
 mod shell;
+mod ssh;
 mod types;
+mod watcher;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -12,7 +19,25 @@ pub fn run() {
     info!("Forge Terminal starting...");
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
+        .setup(|app| {
+            credentials::ensure_default_storage_dir()?;
+
+            let salt_path = credentials::stronghold_salt_path();
+            app.handle().plugin(
+                tauri_plugin_stronghold::Builder::new(move |password| {
+                    tauri_plugin_stronghold::kdf::KeyDerivation::argon2(password, &salt_path)
+                })
+                .build(),
+            )?;
+
+            app.manage(ssh::SshState::new(app.handle().clone()));
+
+            Ok(())
+        })
         .manage(commands::AppState::default())
+        .manage(explorer::ExplorerState::default())
+        .manage(watcher::WatcherState::default())
         .invoke_handler(tauri::generate_handler![
             commands::create_session,
             commands::write_to_session,
@@ -20,7 +45,29 @@ pub fn run() {
             commands::close_session,
             commands::has_running_processes,
             commands::list_available_shells,
-            commands::get_default_shell
+            commands::get_default_shell,
+            commands::list_directory,
+            commands::read_file,
+            commands::write_file,
+            ssh::connect_ssh,
+            ssh::disconnect_ssh,
+            ssh::open_remote_sftp,
+            ssh::close_remote_sftp,
+            ssh::open_remote_file,
+            ssh::list_remote_directory,
+            ssh::read_remote_file,
+            ssh::write_remote_file,
+            ssh::test_connection,
+            ssh::verify_host_key_response,
+            ssh::list_connections,
+            ssh::save_connection,
+            ssh::delete_connection,
+            git_status::get_git_status,
+            credentials::store_credential,
+            credentials::retrieve_credential,
+            credentials::delete_credential,
+            watcher::start_local_watcher,
+            watcher::stop_local_watcher
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
@@ -30,6 +77,16 @@ pub fn run() {
                 if let Ok(mut manager) = state.session_manager.lock() {
                     manager.close_all_sessions();
                 };
+
+                let watcher_state = app_handle.state::<watcher::WatcherState>();
+                if let Ok(mut manager) = watcher_state.manager.lock() {
+                    manager.close_all();
+                };
+
+                let ssh_state = app_handle.state::<ssh::SshState>();
+                tauri::async_runtime::block_on(async move {
+                    ssh_state.close_all_connections().await;
+                });
             }
         });
 }

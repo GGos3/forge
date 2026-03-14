@@ -111,3 +111,130 @@ body {
   color: var(--text-secondary);
   font-size: 0.9em;
 }
+
+/* Host Key Verification Dialog */
+.forge-host-key-dialog {
+  width: 420px;
+  max-width: 90vw;
+}
+
+.forge-host-key-warning {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255, 85, 85, 0.15);
+  border: 1px solid var(--error);
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+.forge-host-key-warning .warning-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.forge-host-key-warning .warning-content {
+  flex: 1;
+}
+
+.forge-host-key-warning .warning-content strong {
+  display: block;
+  color: var(--error);
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+
+.forge-host-key-warning .warning-content p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.forge-host-key-info {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.forge-host-key-info .info-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.forge-host-key-info .info-row:last-child {
+  margin-bottom: 0;
+}
+
+.forge-host-key-info .info-label {
+  color: var(--text-secondary);
+  min-width: 80px;
+  font-size: 12px;
+}
+
+.forge-host-key-info .info-value {
+  color: var(--text-primary);
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.forge-host-key-info .fingerprint-row {
+  flex-direction: column;
+  gap: 4px;
+}
+
+.forge-host-key-info .fingerprint {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  background: var(--bg-secondary);
+  padding: 8px;
+  border-radius: 4px;
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+.forge-host-key-prompt {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+.forge-host-key-prompt.mismatch {
+  color: var(--error);
+}
+
+.forge-host-key-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.forge-dialog-btn-deny {
+  background: var(--bg-primary);
+  border-color: var(--error);
+}
+
+.forge-dialog-btn-deny:hover {
+  background: rgba(255, 85, 85, 0.2);
+}
+
+.forge-dialog-btn-allow {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.forge-dialog-btn-allow:hover {
+  background: #6b4de6;
+}
+
+.forge-dialog-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

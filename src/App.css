@@ -3,3 +3,6 @@
 @import './styles/tab-bar.css';
 @import './styles/pane.css';
 @import './styles/block.css';
+@import './styles/editor.css';
+@import './styles/explorer.css';
+@import './styles/connection.css';

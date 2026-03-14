@@ -39,12 +39,156 @@ const encoder = new TextEncoder();
 const bell = "\u0007";
 const osc = "\u001b]";
 const workspaceRoot = "/home/ggos3/workspace/github.com/ggos3/forge";
+const fixtureRoot = `${workspaceRoot}/tests/fixtures/explorer/project-root`;
 const defaultShell: ShellType = "bash";
 const shells: ShellInfo[] = [
   { name: "Bash", path: "/bin/bash", shell_type: "bash" },
   { name: "Zsh", path: "/bin/zsh", shell_type: "zsh" },
   { name: "Fish", path: "/usr/bin/fish", shell_type: "fish" },
 ];
+
+const fixtureModified = Date.UTC(2026, 2, 13, 0, 0, 0);
+const directoryPermissions = 0o040755;
+const filePermissions = 0o100644;
+const readonlyPermissions = 0o100444;
+const symlinkPermissions = 0o120777;
+const largeFilePath = `${fixtureRoot}/large-file.log`;
+const unsupportedEncodingPath = `${fixtureRoot}/latin1.txt`;
+
+const localFileContents = new Map<string, string>([
+  [
+    `${fixtureRoot}/src/main.ts`,
+    "import { greet } from \"./utils/helper\";\n\nexport function bootstrap(): string {\n  return greet(\"forge\");\n}\n\nconsole.log(bootstrap());\n",
+  ],
+  [`${fixtureRoot}/src/utils/helper.ts`, "export function greet(name: string): string {\n  return `Hello, ${name}!`;\n}\n"],
+  [`${fixtureRoot}/README.md`, "# Explorer Fixture\n\nThis fixture powers Playwright and backend explorer tests.\n"],
+  [`${fixtureRoot}/.gitignore`, "dist/\nnode_modules/\n"],
+  [`${fixtureRoot}/.hidden-dir/secret.txt`, "top secret fixture\n"],
+  [`${fixtureRoot}/readonly.txt`, "Read-only fixture file.\n"],
+]);
+
+const localWrites = new Map<string, string>();
+
+type ExplorerNode = {
+  name: string;
+  path: string;
+  type: "file" | "directory";
+  size: number;
+  modified: number;
+  permissions: number;
+  is_symlink?: boolean;
+  permission_denied?: boolean;
+};
+
+function createNode(
+  name: string,
+  path: string,
+  type: ExplorerNode["type"] | "symlink",
+  size: number,
+  permissions: number,
+  permissionDenied = false
+): ExplorerNode {
+  return {
+    name,
+    path,
+    type: type === "symlink" ? "file" : type,
+    size,
+    modified: fixtureModified,
+    permissions,
+    is_symlink: type === "symlink",
+    permission_denied: permissionDenied,
+  };
+}
+
+function createExplorerTree(rootPath: string): Map<string, ExplorerNode[]> {
+  return new Map<string, ExplorerNode[]>([
+    [
+      rootPath,
+      [
+        createNode(".hidden-dir", `${rootPath}/.hidden-dir`, "directory", 0, directoryPermissions),
+        createNode("src", `${rootPath}/src`, "directory", 0, directoryPermissions),
+        createNode(".gitignore", `${rootPath}/.gitignore`, "file", 19, filePermissions),
+        createNode("binary.png", `${rootPath}/binary.png`, "file", 8, filePermissions),
+        createNode("large-file.log", `${rootPath}/large-file.log`, "file", 6 * 1024 * 1024, filePermissions),
+        createNode("latin1.txt", `${rootPath}/latin1.txt`, "file", 12, filePermissions),
+        createNode("forbidden-dir", `${rootPath}/forbidden-dir`, "directory", 0, directoryPermissions, true),
+        createNode("docs-link", `${rootPath}/docs-link`, "symlink", 0, symlinkPermissions),
+        createNode("README.md", `${rootPath}/README.md`, "file", 69, filePermissions),
+        createNode("readonly.txt", `${rootPath}/readonly.txt`, "file", 24, readonlyPermissions),
+      ],
+    ],
+    [`${rootPath}/.hidden-dir`, [createNode("secret.txt", `${rootPath}/.hidden-dir/secret.txt`, "file", 19, filePermissions)]],
+    [
+      `${rootPath}/src`,
+      [
+        createNode("utils", `${rootPath}/src/utils`, "directory", 0, directoryPermissions),
+        createNode("main.ts", `${rootPath}/src/main.ts`, "file", 131, filePermissions),
+      ],
+    ],
+    [`${rootPath}/src/utils`, [createNode("helper.ts", `${rootPath}/src/utils/helper.ts`, "file", 77, filePermissions)]],
+  ]);
+}
+
+const localTree = createExplorerTree(fixtureRoot);
+
+function normalizeRelativePath(value: unknown): string {
+  return String(value ?? "").replace(/^\/+/, "").replace(/\/$/, "");
+}
+
+function resolveRequestPayload(args: unknown): Record<string, unknown> {
+  if (args && typeof args === "object" && "request" in args) {
+    const request = (args as { request?: Record<string, unknown> }).request;
+    if (request && typeof request === "object") {
+      return request;
+    }
+  }
+
+  return (args as Record<string, unknown>) ?? {};
+}
+
+function normalizeLocalPath(args: unknown): string {
+  const request = resolveRequestPayload(args);
+  const root = typeof request.root === "string" && request.root.length > 0 ? request.root.replace(/\/$/, "") : fixtureRoot;
+  const rawPath = typeof request.path === "string" && request.path.length > 0 ? request.path : root;
+
+  if (rawPath === ".") {
+    return root;
+  }
+
+  if (rawPath === root || rawPath.startsWith(`${root}/`)) {
+    return rawPath;
+  }
+
+  const relativePath = normalizeRelativePath(rawPath);
+  if (relativePath.length === 0 || relativePath === ".") {
+    return root;
+  }
+
+  return `${root}/${relativePath}`;
+}
+
+function listTreeEntries(path: string, showHidden: boolean): ExplorerNode[] {
+  const entries = localTree.get(path);
+  if (!entries) {
+    throw new Error(`Unknown directory: ${path}`);
+  }
+
+  return entries
+    .filter((entry) => showHidden || !entry.name.startsWith("."))
+    .map((entry) => ({ ...entry }));
+}
+
+function readTextFile(path: string): string | null {
+  if (localWrites.has(path)) {
+    return localWrites.get(path) ?? null;
+  }
+
+  if (localFileContents.has(path)) {
+    return localFileContents.get(path) ?? null;
+  }
+
+  return null;
+}
 
 function marker(content: string): string {
   return `${osc}133;${content}${bell}`;
@@ -228,6 +372,88 @@ export async function invokeMock<T>(command: string, args?: Record<string, unkno
       return shells as T;
     case "get_default_shell":
       return defaultShell as T;
+    case "plugin:dialog|open":
+      return fixtureRoot as T;
+    case "list_directory": {
+      const path = normalizeLocalPath(args);
+      const showHidden = Boolean((resolveRequestPayload(args).show_hidden as boolean | undefined) ?? false);
+      return listTreeEntries(path, showHidden) as T;
+    }
+    case "read_file": {
+      const path = normalizeLocalPath(args);
+      if (path === largeFilePath) {
+        return {
+          path,
+          content: "",
+          size: 6 * 1024 * 1024,
+          is_binary: false,
+          is_read_only: false,
+          is_unsupported_encoding: false,
+          permissions: filePermissions,
+        } as T;
+      }
+
+      if (path === unsupportedEncodingPath) {
+        return {
+          path,
+          content: "",
+          size: 12,
+          is_binary: false,
+          is_read_only: false,
+          is_unsupported_encoding: true,
+          permissions: filePermissions,
+        } as T;
+      }
+
+      if (path.endsWith("/binary.png")) {
+        return {
+          path,
+          content: "",
+          size: 8,
+          is_binary: true,
+          is_read_only: false,
+          is_unsupported_encoding: false,
+          permissions: filePermissions,
+        } as T;
+      }
+
+      const content = readTextFile(path);
+      if (content === null) {
+        throw new Error(`Unknown file: ${path}`);
+      }
+
+      const permissions = path.endsWith("/readonly.txt") ? readonlyPermissions : filePermissions;
+      return {
+        path,
+        content,
+        size: content.length,
+        is_binary: false,
+        is_read_only: permissions === readonlyPermissions,
+        is_unsupported_encoding: false,
+        permissions,
+      } as T;
+    }
+    case "write_file": {
+      const request = resolveRequestPayload(args);
+      const path = normalizeLocalPath(request);
+      const content = request.content;
+      if (typeof content !== "string") {
+        throw new Error("write_file requires string content");
+      }
+
+      localWrites.set(path, content);
+      return null as T;
+    }
+    case "get_git_status":
+      return {
+        "README.md": "Modified",
+        "src/main.ts": "Staged",
+        "readonly.txt": "Untracked",
+      } as T;
+    case "start_local_watcher":
+      return null as T;
+    case "stop_local_watcher":
+      return null as T;
     case "create_session": {
       const shell = (args?.config as { shell?: ShellType } | undefined)?.shell ?? defaultShell;
       const sessionId = `session-${state.nextSessionId++}`;

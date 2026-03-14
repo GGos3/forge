@@ -1,0 +1,8 @@
+[package]
+name = "russh-keys"
+version = "0.57.0"
+edition = "2021"
+
+[lib]
+name = "russh_keys"
+path = "src/lib.rs"

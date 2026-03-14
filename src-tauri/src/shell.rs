@@ -37,7 +37,7 @@ pub fn get_default_shell() -> ShellType {
                 .file_name()
                 .and_then(|n| n.to_str())
                 .unwrap_or("bash");
-            
+
             return match shell_name {
                 "zsh" => ShellType::Zsh,
                 "fish" => ShellType::Fish,
@@ -169,7 +169,11 @@ mod tests {
     fn test_get_default_shell_returns_valid_shell() {
         let default = get_default_shell();
         match default {
-            ShellType::Bash | ShellType::Zsh | ShellType::Fish | ShellType::PowerShell | ShellType::Cmd => {}
+            ShellType::Bash
+            | ShellType::Zsh
+            | ShellType::Fish
+            | ShellType::PowerShell
+            | ShellType::Cmd => {}
         }
     }
 
@@ -195,7 +199,7 @@ mod tests {
         let default = get_default_shell();
         let shells = list_available_shells();
         let default_available = shells.iter().any(|s| s.shell_type == default);
-        
+
         if !default_available {
             assert!(resolve_shell_path(&default).is_ok() || default_available);
         }

@@ -1,0 +1,44 @@
+.forge-connection-list {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.forge-connection-item {
+  display: flex;
+  align-items: center;
+  height: var(--explorer-node-height);
+  padding: 0 8px;
+  cursor: pointer;
+  box-sizing: border-box;
+  color: var(--text-primary);
+  font-size: 13px;
+  user-select: none;
+  gap: 8px;
+}
+
+.forge-connection-item:hover {
+  background-color: var(--explorer-hover);
+}
+
+.forge-connection-item[data-active="true"] {
+  background-color: var(--explorer-selected);
+}
+
+.forge-connection-dialog {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  width: 400px;
+  box-sizing: border-box;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.forge-connection-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+}

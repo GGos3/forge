@@ -8,4 +8,25 @@
   --error: #ff5555;
   --border: #3a3a52;
   --block-divider: #2d2d44;
+
+  /* Explorer sidebar */
+  --explorer-width: 260px;
+  --explorer-min-width: 180px;
+  --explorer-max-width: 500px;
+  --explorer-bg: var(--bg-secondary);
+  --explorer-hover: var(--bg-active);
+  --explorer-selected: rgba(124, 91, 245, 0.15);
+  --explorer-indent: 16px;
+  --explorer-icon-size: 16px;
+  --explorer-node-height: 28px;
+
+  /* Git status badge colors */
+  --git-modified: #e2b93d;
+  --git-untracked: #73c991;
+  --git-staged: #7c5bf5;
+
+  /* Inline editor */
+  --editor-bg: var(--bg-primary);
+  --editor-gutter: var(--bg-secondary);
+  --editor-line-highlight: rgba(255, 255, 255, 0.04);
 }

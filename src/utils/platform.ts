@@ -129,6 +129,10 @@ export function getTabIndexFromShortcut(event: ShortcutEventLike, platform: Forg
   return Number(event.key) - 1;
 }
 
+export function matchesToggleSidebarShortcut(event: ShortcutEventLike, platform: ForgePlatform): boolean {
+  return hasPrimaryModifier(event, platform) && !event.shiftKey && matchesLetterKey(event, "b");
+}
+
 export function getPaneFocusDirection(event: ShortcutEventLike): PaneFocusDirection | null {
   if (!event.altKey || event.metaKey || event.ctrlKey || event.shiftKey) {
     return null;
@@ -154,4 +158,36 @@ export function getNewTabShortcutLabel(platform: ForgePlatform): string {
 
 export function getCloseTabShortcutLabel(platform: ForgePlatform): string {
   return `${isMacPlatform(platform) ? "Cmd" : "Ctrl"}+W`;
+}
+
+/**
+ * Check if global keyboard shortcuts should be handled.
+ * Returns false when terminal, editor, or other input elements have focus.
+ */
+export function shouldHandleGlobalShortcuts(): boolean {
+  const activeElement = document.activeElement;
+  
+  if (!activeElement) {
+    return true;
+  }
+
+  const tagName = activeElement.tagName.toLowerCase();
+  
+  // Don't handle shortcuts when input elements have focus
+  if (tagName === "input" || tagName === "textarea") {
+    return false;
+  }
+
+  // Don't handle shortcuts when contenteditable elements have focus
+  if (activeElement.getAttribute("contenteditable") === "true") {
+    return false;
+  }
+
+  // Don't handle shortcuts when CodeMirror editor has focus
+  if (activeElement.classList.contains("cm-content") || 
+      activeElement.closest(".cm-editor")) {
+    return false;
+  }
+
+  return true;
 }
