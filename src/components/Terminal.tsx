@@ -126,29 +126,9 @@ export default function Terminal(props: TerminalProps) {
     let resizeObserver: ResizeObserver | undefined;
 
     const blockParser = new BlockParser();
+    const blockStartRows = new Map<string, number>();
 
-    const logicalLineToBufferRow = (activeBuffer: XTerm["buffer"]["active"], logicalLine: number) => {
-      const targetLine = Math.max(1, logicalLine);
-      let logicalIndex = 1;
-
-      for (let row = 0; row < activeBuffer.length; row++) {
-        const line = activeBuffer.getLine?.(row);
-        if (!line) {
-          continue;
-        }
-
-        if (logicalIndex === targetLine) {
-          return row;
-        }
-
-        const nextLine = activeBuffer.getLine?.(row + 1);
-        if (!nextLine?.isWrapped) {
-          logicalIndex += 1;
-        }
-      }
-
-      return Math.max(0, targetLine - 1);
-    };
+    const cursorRow = () => terminal!.buffer.active.baseY + terminal!.buffer.active.cursorY;
 
     const updateBlocksUI = () => {
       if (!terminal) return;
@@ -157,8 +137,7 @@ export default function Terminal(props: TerminalProps) {
       const currentBlock = blockParser.getCurrentBlock();
       const blocksToRender = currentBlock ? [...allBlocks, currentBlock] : allBlocks;
       
-      const activeBuffer = terminal.buffer.active;
-      const viewportY = activeBuffer.viewportY;
+      const viewportY = terminal.buffer.active.viewportY;
       const cellHeight = (terminal.element?.clientHeight || 0) / terminal.rows;
       if (cellHeight === 0 || Number.isNaN(cellHeight)) return;
 
@@ -167,10 +146,10 @@ export default function Terminal(props: TerminalProps) {
       for (let i = 0; i < blocksToRender.length; i++) {
         const b = blocksToRender[i];
         const nextBlock = blocksToRender[i + 1];
-        const startRow = logicalLineToBufferRow(activeBuffer, b.startLine);
-        const endRow = nextBlock
-          ? Math.max(startRow + 1, logicalLineToBufferRow(activeBuffer, nextBlock.startLine))
-          : Math.max(startRow + 1, logicalLineToBufferRow(activeBuffer, b.endLine + 1));
+        const startRow = blockStartRows.get(b.id) ?? 0;
+        const endRow = nextBlock && blockStartRows.has(nextBlock.id)
+          ? Math.max(startRow + 1, blockStartRows.get(nextBlock.id)!)
+          : Math.max(startRow + 1, cursorRow());
 
         const relativeRow = startRow - viewportY;
         const top = relativeRow * cellHeight;
@@ -283,10 +262,17 @@ export default function Terminal(props: TerminalProps) {
       }
 
       const str = textDecoder.decode(new Uint8Array(event.payload.data));
+      const prevBlockId = blockParser.getCurrentBlock()?.id;
       blockParser.feed(str);
+      const newBlockId = blockParser.getCurrentBlock()?.id;
 
       xterm.write(new Uint8Array(event.payload.data), () => {
         syncDebugState(undefined, undefined, undefined, event.payload.data.length);
+
+        if (newBlockId && newBlockId !== prevBlockId && !blockStartRows.has(newBlockId)) {
+          blockStartRows.set(newBlockId, cursorRow());
+        }
+
         updateBlocksUI();
       });
     }).then((unlisten) => {
