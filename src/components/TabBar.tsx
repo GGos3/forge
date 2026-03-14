@@ -159,6 +159,7 @@ export default function TabBar() {
                   onDragStart={cancelInteractiveDrag}
                   onClick={(e) => {
                     e.stopPropagation();
+                    console.log("[forge-debug] close tab click", { tabId: tab.id, activeTabId: tabStore.activeTabId });
                     void tabStore.closeTab(tab.id);
                   }}
                   title={`Close Tab (${closeTabShortcutLabel})`}

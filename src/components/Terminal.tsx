@@ -137,6 +137,7 @@ export default function Terminal(props: TerminalProps) {
     }
 
     const focusTerminal = () => {
+      console.log("[forge-debug] terminal focus request", { sessionId: sessionValue, focusedProp: props.focused });
       focusHostRef?.focus({ preventScroll: true });
       xterm.focus();
     };
@@ -146,6 +147,7 @@ export default function Terminal(props: TerminalProps) {
     }
 
     const handleMouseDown = () => {
+      console.log("[forge-debug] terminal container mousedown", { sessionId: sessionValue });
       queueMicrotask(() => {
         focusTerminal();
       });
@@ -154,10 +156,14 @@ export default function Terminal(props: TerminalProps) {
     containerRef.addEventListener("mousedown", handleMouseDown);
 
     const inputDisposable = xterm.onData((data) => {
+      console.log("[forge-debug] xterm onData", { sessionId: sessionValue, data, length: data.length });
+
       if (exited) {
+        console.log("[forge-debug] xterm onData ignored after exit", { sessionId: sessionValue });
         return;
       }
 
+      console.log("[forge-debug] invoke write_to_session", { sessionId: sessionValue, bytes: textEncoder.encode(data).length });
       void invoke("write_to_session", {
         session_id: sessionValue,
         data: Array.from(textEncoder.encode(data)),
@@ -249,6 +255,7 @@ export default function Terminal(props: TerminalProps) {
 
   createEffect(() => {
     if (props.focused) {
+      console.log("[forge-debug] props.focused effect", { sessionId: getSessionValue(props.sessionId) });
       terminal?.focus();
     }
   });
@@ -278,6 +285,7 @@ export default function Terminal(props: TerminalProps) {
       tabIndex={-1}
       data-testid="terminal-focus-host"
       onMouseDown={() => {
+        console.log("[forge-debug] terminal focus host mousedown", { sessionId: getSessionValue(props.sessionId) });
         focusHostRef?.focus({ preventScroll: true });
         terminal?.focus();
       }}
