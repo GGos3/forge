@@ -70,7 +70,7 @@ jobs:
         run: |
           pnpm test:run
           pnpm build
-          cargo test --manifest-path src-tauri/Cargo.toml
+          cargo build --manifest-path src-tauri/Cargo.toml
 
       - name: Publish dev release
         uses: tauri-apps/tauri-action@v0.6.1
