@@ -30,6 +30,7 @@ export default function Terminal(props: TerminalProps) {
   let lastInputValue = "";
   let lastWriteStatusValue = "idle";
   let lastOutputBytesValue = 0;
+  let lastRawHexValue = "";
 
   const currentTerminalTheme = () => ({
     background: getComputedStyle(document.documentElement).getPropertyValue("--surface-1").trim() || "#1e1e2e",
@@ -49,6 +50,7 @@ export default function Terminal(props: TerminalProps) {
     lastInput: "",
     lastWriteStatus: "idle",
     lastOutputBytes: 0,
+    lastRawHex: "",
   });
 
   const syncDebugState = (nextPointerTarget?: string, nextInput?: string, nextWriteStatus?: string, nextOutputBytes?: number) => {
@@ -65,7 +67,7 @@ export default function Terminal(props: TerminalProps) {
       lastOutputBytesValue = nextOutputBytes;
     }
 
-    const activeElement = document.activeElement as HTMLElement | null;
+     const activeElement = document.activeElement as HTMLElement | null;
     setDebugState({
       textareaPresent: Boolean(containerRef?.querySelector("textarea")),
       helperTextareaPresent: Boolean(containerRef?.querySelector(".xterm-helper-textarea")),
@@ -75,6 +77,7 @@ export default function Terminal(props: TerminalProps) {
       lastInput: lastInputValue,
       lastWriteStatus: lastWriteStatusValue,
       lastOutputBytes: lastOutputBytesValue,
+      lastRawHex: lastRawHexValue,
     });
   };
 
@@ -261,7 +264,9 @@ export default function Terminal(props: TerminalProps) {
         return;
       }
 
-      const str = textDecoder.decode(new Uint8Array(event.payload.data));
+      const rawBytes = new Uint8Array(event.payload.data);
+      const str = textDecoder.decode(rawBytes);
+      lastRawHexValue = Array.from(rawBytes.slice(0, 80)).map(b => b.toString(16).padStart(2, "0")).join(" ");
       const preWriteRow = cursorRow();
       const prevBlockId = blockParser.getCurrentBlock()?.id;
       blockParser.feed(str);
@@ -376,6 +381,7 @@ export default function Terminal(props: TerminalProps) {
         <div>lastInput: {debugState().lastInput || "(none)"}</div>
         <div>writeStatus: {debugState().lastWriteStatus}</div>
         <div>lastOutputBytes: {debugState().lastOutputBytes}</div>
+        <div style={{ "font-size": "9px", "word-break": "break-all" }}>rawHex: {debugState().lastRawHex || "(none)"}</div>
       </div>
     </div>
   );
