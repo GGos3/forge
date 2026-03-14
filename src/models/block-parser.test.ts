@@ -54,6 +54,27 @@ describe("BlockParser", () => {
     expect(block.output).toBe("done\n");
   });
 
+  it("anchors inline B command blocks to the previous line after an echoed newline", () => {
+    const parser = new BlockParser();
+
+    parser.feed(`echo inline\n${osc("A")}${osc("B;echo inline")}${osc("C")}inline\n${osc("D;0")}`);
+
+    const [block] = parser.getBlocks();
+    expect(block.command).toBe("echo inline");
+    expect(block.startLine).toBe(1);
+    expect(block.endLine).toBe(3);
+  });
+
+  it("keeps inline B command blocks on the current line before a newline arrives", () => {
+    const parser = new BlockParser();
+
+    parser.feed(`${osc("A")}${osc("B;echo inline")}${osc("C")}inline\n${osc("D;0")}`);
+
+    const [block] = parser.getBlocks();
+    expect(block.command).toBe("echo inline");
+    expect(block.startLine).toBe(1);
+  });
+
   it("captures non-zero exit codes", () => {
     const parser = new BlockParser();
 
