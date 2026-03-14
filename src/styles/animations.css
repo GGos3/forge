@@ -1,0 +1,85 @@
+@keyframes forge-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes forge-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes forge-slide-in-right {
+  from { transform: translateX(-12px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes forge-slide-in-up {
+  from { transform: translateY(8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes forge-slide-in-down {
+  from { transform: translateY(-8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes forge-scale-in {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes forge-spinner {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes forge-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.forge-animate-fade-in {
+  animation: forge-fade-in var(--duration-normal) var(--ease-out) both;
+}
+
+.forge-animate-slide-in-right {
+  animation: forge-slide-in-right var(--duration-normal) var(--ease-out) both;
+}
+
+.forge-animate-slide-in-up {
+  animation: forge-slide-in-up var(--duration-normal) var(--ease-out) both;
+}
+
+.forge-animate-slide-in-down {
+  animation: forge-slide-in-down var(--duration-normal) var(--ease-out) both;
+}
+
+.forge-animate-scale-in {
+  animation: forge-scale-in var(--duration-normal) var(--ease-out) both;
+}
+
+.forge-animate-spinner {
+  animation: forge-spinner 800ms linear infinite;
+}
+
+.forge-animate-pulse {
+  animation: forge-pulse 2s var(--ease-in-out) infinite;
+}
+
+.forge-transition-colors {
+  transition-property: color, background-color, border-color;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-default);
+}
+
+.forge-transition-opacity {
+  transition: opacity var(--duration-normal) var(--ease-default);
+}
+
+.forge-transition-transform {
+  transition: transform var(--duration-normal) var(--ease-default);
+}
+
+.forge-transition-all {
+  transition: all var(--duration-normal) var(--ease-default);
+}

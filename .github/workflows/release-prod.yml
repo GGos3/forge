@@ -99,12 +99,7 @@ jobs:
         if: always()
         shell: bash
         run: |
-          shopt -s globstar nullglob
-          LATEST_JSON=""
-          for candidate in src-tauri/target/release/bundle/**/latest.json; do
-            LATEST_JSON="$candidate"
-            break
-          done
+          LATEST_JSON="$(find src-tauri/target/release/bundle -name 'latest.json' 2>/dev/null | head -1)"
           if [ -z "$LATEST_JSON" ]; then
             echo "No latest.json generated; skipping updater alias generation"
             exit 0

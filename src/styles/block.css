@@ -6,7 +6,7 @@
   bottom: 0;
   pointer-events: none;
   overflow: hidden;
-  z-index: 10;
+  z-index: var(--z-overlay);
 }
 
 .forge-block-divider {
@@ -17,25 +17,26 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 0 20px;
+  padding: 0 var(--space-5);
 }
 
 .forge-block-header {
   pointer-events: auto;
   display: flex;
-  gap: 12px;
-  padding: 4px 8px;
-  background-color: var(--bg);
-  border-radius: 0 0 4px 4px;
-  font-size: 12px;
+  gap: var(--space-3);
+  padding: var(--space-1) var(--space-2);
+  background-color: var(--surface-3);
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  font-size: var(--text-sm);
   color: var(--text-secondary);
   border: 1px solid var(--border);
   border-top: none;
   opacity: 0.7;
+  transition: opacity var(--duration-fast) var(--ease-default);
 }
 
 .forge-block-running-indicator {
-  color: #ffcc00;
+  color: var(--warning);
   opacity: 1;
 }
 
@@ -60,14 +61,15 @@
 .forge-block-actions {
   pointer-events: auto;
   display: flex;
-  gap: 8px;
-  background-color: var(--bg-active);
-  padding: 4px;
-  border-radius: 4px;
-  margin-top: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  gap: var(--space-2);
+  background-color: var(--surface-4);
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  margin-top: var(--space-1);
+  box-shadow: var(--shadow-md);
   opacity: 0;
   border: 1px solid var(--border);
+  transition: opacity var(--duration-fast) var(--ease-default);
 }
 
 .forge-block-divider:hover .forge-block-actions,
@@ -79,10 +81,12 @@
   background: none;
   border: 1px solid var(--border);
   color: var(--text-secondary);
-  border-radius: 3px;
-  padding: 2px 8px;
-  font-size: 12px;
+  border-radius: var(--radius-xs);
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-sm);
   cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-default),
+              color var(--duration-fast) var(--ease-default);
 }
 
 .forge-block-btn:hover {

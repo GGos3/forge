@@ -16,11 +16,11 @@
   display: flex;
   align-items: center;
   height: 36px;
-  padding: 0 8px;
-  background-color: var(--bg-secondary);
+  padding: 0 var(--space-2);
+  background-color: var(--surface-2);
   border-bottom: 1px solid var(--border);
   box-sizing: border-box;
-  gap: 8px;
+  gap: var(--space-2);
   flex-shrink: 0;
 }
 
@@ -35,13 +35,14 @@
   display: flex;
   align-items: center;
   height: var(--explorer-node-height);
-  padding-right: 8px;
+  padding-right: var(--space-2);
   cursor: pointer;
   box-sizing: border-box;
   color: var(--text-primary);
-  font-size: 13px;
+  font-size: var(--text-base);
   user-select: none;
   white-space: nowrap;
+  transition: background-color var(--duration-fast) var(--ease-default);
 }
 
 .forge-tree-node:hover {
@@ -59,7 +60,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 4px;
+  margin-right: var(--space-1);
 }
 
 .forge-tree-node-label {
@@ -67,7 +68,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 13px;
+  font-size: var(--text-base);
 }
 
 .forge-tree-indent {
@@ -79,9 +80,9 @@
 .forge-git-badge {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   flex-shrink: 0;
-  margin-left: 4px;
+  margin-left: var(--space-1);
 }
 
 .forge-git-badge[data-status="modified"] {

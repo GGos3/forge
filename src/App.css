@@ -1,4 +1,3 @@
-@import './styles/theme.css';
 @import './styles/global.css';
 @import './styles/tab-bar.css';
 @import './styles/pane.css';
@@ -11,28 +10,34 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 8px 12px;
-  background: rgba(124, 91, 245, 0.12);
-  border-bottom: 1px solid rgba(124, 91, 245, 0.25);
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--accent-subtle);
+  border-bottom: 1px solid var(--accent-muted);
   color: var(--text-primary);
-  font-size: 13px;
+  font-size: var(--text-base);
+  animation: forge-slide-in-down var(--duration-normal) var(--ease-out) both;
 }
 
 .forge-updater-banner__content {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-3);
   width: 100%;
 }
 
 .forge-updater-banner__button {
   border: 1px solid var(--accent);
   background: var(--accent);
-  color: #fff;
-  border-radius: 6px;
-  padding: 6px 10px;
+  color: var(--text-on-accent);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
   cursor: pointer;
-  font-size: 12px;
+  font-size: var(--text-sm);
+  transition: background-color var(--duration-fast) var(--ease-default);
+}
+
+.forge-updater-banner__button:hover {
+  background: var(--accent-hover);
 }

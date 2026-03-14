@@ -74,6 +74,9 @@ importers:
       codemirror:
         specifier: ^6.0.2
         version: 6.0.2
+      solid-icons:
+        specifier: ^1.2.0
+        version: 1.2.0(solid-js@1.9.11)
       solid-js:
         specifier: ^1.9.3
         version: 1.9.11
@@ -1167,6 +1170,11 @@ packages:
 
   siginfo@2.0.0:
     resolution: {integrity: sha512-ybx0WO1/8bSBLEWXZvEd7gMW3Sn3JFlW3TvX1nREbDLRNQNaeNN8WK0meBwPdAaOI7TtRRRJn/Es1zhrrCHu7g==}
+
+  solid-icons@1.2.0:
+    resolution: {integrity: sha512-yjQxWQMi9l19P5Af9vjsvalTMDFPDL4XD6etrUdNxNVhFp1bMYF0SFwUa5VYDfJ7u0SF3Qkz/F7BZxqcLUwklw==}
+    peerDependencies:
+      solid-js: '*'
 
   solid-js@1.9.11:
     resolution: {integrity: sha512-WEJtcc5mkh/BnHA6Yrg4whlF8g6QwpmXXRg4P2ztPmcKeHHlH4+djYecBLhSpecZY2RRECXYUwIc/C2r3yzQ4Q==}
@@ -2424,6 +2432,10 @@ snapshots:
   seroval@1.5.1: {}
 
   siginfo@2.0.0: {}
+
+  solid-icons@1.2.0(solid-js@1.9.11):
+    dependencies:
+      solid-js: 1.9.11
 
   solid-js@1.9.11:
     dependencies:

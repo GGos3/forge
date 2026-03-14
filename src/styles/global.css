@@ -1,9 +1,10 @@
 @import './theme.css';
+@import './animations.css';
 
 :root {
-  font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
-  font-size: 14px;
-  line-height: 1.5;
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  line-height: var(--leading-normal);
   color: var(--text-primary);
   background-color: var(--bg-primary);
   font-synthesis: none;
@@ -19,23 +20,23 @@ body {
 }
 
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--bg-active);
-  border-radius: 4px;
+  background: var(--surface-5);
+  border-radius: var(--radius-full);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--border);
+  background: var(--border-strong);
 }
 
 ::selection {
   background-color: var(--accent);
-  color: #fff;
+  color: var(--text-on-accent);
 }
 
 .forge-app {
@@ -63,7 +64,6 @@ body {
   height: 100%;
 }
 
-/* Dialog styles */
 .forge-dialog-overlay {
   position: fixed;
   top: 0;
@@ -74,45 +74,49 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: var(--z-modal-backdrop);
+  animation: forge-fade-in var(--duration-fast) var(--ease-out) both;
 }
 
 .forge-dialog {
-  background: var(--bg-secondary);
+  background: var(--surface-3);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 16px;
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
   width: 300px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-lg);
+  animation: forge-scale-in var(--duration-normal) var(--ease-out) both;
 }
 
 .forge-dialog h3 {
-  margin: 0 0 16px 0;
+  margin: 0 0 var(--space-4) 0;
   color: var(--text-primary);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
 }
 
 .forge-dialog-btn {
-  background: var(--bg-primary);
+  background: var(--surface-1);
   border: 1px solid var(--border);
   color: var(--text-primary);
-  padding: 8px 12px;
-  border-radius: 4px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
   cursor: pointer;
   text-align: left;
   display: flex;
   justify-content: space-between;
+  transition: background-color var(--duration-fast) var(--ease-default);
 }
 
 .forge-dialog-btn:hover {
-  background: var(--bg-active);
+  background: var(--surface-4);
 }
 
 .forge-dialog-btn span:last-child {
   color: var(--text-secondary);
-  font-size: 0.9em;
+  font-size: var(--text-sm);
 }
 
-/* Host Key Verification Dialog */
 .forge-host-key-dialog {
   width: 420px;
   max-width: 90vw;
@@ -120,12 +124,12 @@ body {
 
 .forge-host-key-warning {
   display: flex;
-  gap: 12px;
-  padding: 12px;
-  background: rgba(255, 85, 85, 0.15);
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--error-muted);
   border: 1px solid var(--error);
-  border-radius: 6px;
-  margin-bottom: 16px;
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
 }
 
 .forge-host-key-warning .warning-icon {
@@ -140,29 +144,29 @@ body {
 .forge-host-key-warning .warning-content strong {
   display: block;
   color: var(--error);
-  margin-bottom: 4px;
-  font-size: 12px;
+  margin-bottom: var(--space-1);
+  font-size: var(--text-sm);
 }
 
 .forge-host-key-warning .warning-content p {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: var(--text-sm);
   line-height: 1.4;
 }
 
 .forge-host-key-info {
-  background: var(--bg-primary);
+  background: var(--surface-1);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 12px;
-  margin-bottom: 16px;
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  margin-bottom: var(--space-4);
 }
 
 .forge-host-key-info .info-row {
   display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
 }
 
 .forge-host-key-info .info-row:last-child {
@@ -172,37 +176,37 @@ body {
 .forge-host-key-info .info-label {
   color: var(--text-secondary);
   min-width: 80px;
-  font-size: 12px;
+  font-size: var(--text-sm);
 }
 
 .forge-host-key-info .info-value {
   color: var(--text-primary);
-  font-size: 12px;
+  font-size: var(--text-sm);
   word-break: break-all;
 }
 
 .forge-host-key-info .fingerprint-row {
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .forge-host-key-info .fingerprint {
   display: block;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
   color: var(--accent);
-  background: var(--bg-secondary);
-  padding: 8px;
-  border-radius: 4px;
+  background: var(--surface-2);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
   word-break: break-all;
   line-height: 1.4;
 }
 
 .forge-host-key-prompt {
   color: var(--text-secondary);
-  font-size: 13px;
-  margin: 0 0 16px 0;
-  line-height: 1.5;
+  font-size: var(--text-base);
+  margin: 0 0 var(--space-4) 0;
+  line-height: var(--leading-normal);
 }
 
 .forge-host-key-prompt.mismatch {
@@ -212,26 +216,26 @@ body {
 .forge-host-key-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .forge-dialog-btn-deny {
-  background: var(--bg-primary);
+  background: var(--surface-1);
   border-color: var(--error);
 }
 
 .forge-dialog-btn-deny:hover {
-  background: rgba(255, 85, 85, 0.2);
+  background: var(--error-muted);
 }
 
 .forge-dialog-btn-allow {
   background: var(--accent);
   border-color: var(--accent);
-  color: white;
+  color: var(--text-on-accent);
 }
 
 .forge-dialog-btn-allow:hover {
-  background: #6b4de6;
+  background: var(--accent-hover);
 }
 
 .forge-dialog-btn:disabled {

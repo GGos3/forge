@@ -1,32 +1,151 @@
-:root {
-  --bg-primary: #1e1e2e;
-  --bg-secondary: #27273a;
-  --bg-active: #313147;
-  --text-primary: #e0e0e6;
-  --text-secondary: #8888a0;
-  --accent: #7c5bf5;
-  --error: #ff5555;
-  --border: #3a3a52;
-  --block-divider: #2d2d44;
+/*
+ * Forge Design Tokens
+ * Warp-inspired dark theme with comprehensive token system.
+ * All spacing uses a 4px base unit. Colors use layered surface model.
+ */
 
-  /* Explorer sidebar */
+:root {
+  /* ─── Surface Layers (darkest → lightest) ─── */
+  --surface-0: #0f0f17;          /* deepest background, rarely used */
+  --surface-1: #16161e;          /* app background */
+  --surface-2: #1a1b26;          /* sidebar, panels */
+  --surface-3: #1e1f2b;          /* cards, elevated surfaces */
+  --surface-4: #262736;          /* active/selected items */
+  --surface-5: #2e2f3e;          /* hover states, raised elements */
+
+  /* Backward-compatible aliases */
+  --bg-primary: var(--surface-1);
+  --bg-secondary: var(--surface-2);
+  --bg-active: var(--surface-4);
+
+  /* ─── Text ─── */
+  --text-primary: #e1e1e6;
+  --text-secondary: #6b6b7b;
+  --text-tertiary: #4a4a5a;
+  --text-on-accent: #ffffff;
+  --text-link: #7aa2f7;
+
+  /* ─── Accent & Status ─── */
+  --accent: #7c5bf5;
+  --accent-hover: #6b4de6;
+  --accent-muted: rgba(124, 91, 245, 0.15);
+  --accent-subtle: rgba(124, 91, 245, 0.08);
+
+  --success: #73c991;
+  --success-muted: rgba(115, 201, 145, 0.15);
+  --warning: #e2b93d;
+  --warning-muted: rgba(226, 185, 61, 0.15);
+  --error: #f7768e;
+  --error-muted: rgba(247, 118, 142, 0.15);
+  --info: #7aa2f7;
+  --info-muted: rgba(122, 162, 247, 0.15);
+
+  /* ─── Borders ─── */
+  --border: #2e2f3e;
+  --border-subtle: #232434;
+  --border-strong: #3a3b4e;
+  --border-focus: var(--accent);
+
+  /* ─── Block (terminal command blocks) ─── */
+  --block-divider: #232434;
+  --block-bg-hover: rgba(255, 255, 255, 0.02);
+  --block-input-bg: var(--surface-3);
+
+  /* ─── Explorer sidebar ─── */
   --explorer-width: 260px;
   --explorer-min-width: 180px;
   --explorer-max-width: 500px;
-  --explorer-bg: var(--bg-secondary);
-  --explorer-hover: var(--bg-active);
-  --explorer-selected: rgba(124, 91, 245, 0.15);
+  --explorer-bg: var(--surface-2);
+  --explorer-hover: var(--surface-4);
+  --explorer-selected: var(--accent-muted);
   --explorer-indent: 16px;
   --explorer-icon-size: 16px;
   --explorer-node-height: 28px;
 
-  /* Git status badge colors */
-  --git-modified: #e2b93d;
-  --git-untracked: #73c991;
-  --git-staged: #7c5bf5;
+  /* ─── Git status badge ─── */
+  --git-modified: var(--warning);
+  --git-untracked: var(--success);
+  --git-staged: var(--accent);
 
-  /* Inline editor */
-  --editor-bg: var(--bg-primary);
-  --editor-gutter: var(--bg-secondary);
-  --editor-line-highlight: rgba(255, 255, 255, 0.04);
+  /* ─── Inline editor ─── */
+  --editor-bg: var(--surface-1);
+  --editor-gutter: var(--surface-2);
+  --editor-line-highlight: rgba(255, 255, 255, 0.03);
+
+  /* ─── Nav Rail (icon sidebar) ─── */
+  --nav-rail-width: 48px;
+  --nav-rail-bg: var(--surface-0);
+  --nav-rail-icon: var(--text-secondary);
+  --nav-rail-icon-active: var(--text-primary);
+  --nav-rail-indicator: var(--accent);
+
+  /* ─── Typography ─── */
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Helvetica, Arial, sans-serif;
+
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 13px;
+  --text-md: 14px;
+  --text-lg: 16px;
+  --text-xl: 18px;
+  --text-2xl: 22px;
+
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* ─── Spacing (4px base) ─── */
+  --space-0: 0px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ─── Border Radius ─── */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+
+  /* ─── Shadows ─── */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.6);
+  --shadow-inset: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+
+  /* ─── Transitions ─── */
+  --duration-fast: 100ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 500ms;
+
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ─── Z-index layers ─── */
+  --z-base: 0;
+  --z-overlay: 10;
+  --z-dropdown: 20;
+  --z-sticky: 30;
+  --z-modal-backdrop: 40;
+  --z-modal: 50;
+  --z-toast: 60;
 }
