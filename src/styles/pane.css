@@ -9,6 +9,7 @@
   height: 100%;
   border: 1px solid transparent;
   transition: border-color var(--duration-fast) var(--ease-default);
+  -webkit-app-region: no-drag;
 }
 
 .forge-pane-terminal-wrapper[data-focused="true"] {
@@ -58,6 +59,7 @@
   width: 100%;
   height: 100%;
   position: relative;
+  -webkit-app-region: no-drag;
 }
 
 .forge-terminal-pane__close {

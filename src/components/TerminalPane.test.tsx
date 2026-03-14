@@ -89,9 +89,8 @@ describe("TerminalPane", () => {
     expect(invoke).not.toHaveBeenCalled();
   });
 
-  it("renders pane close button and routes close through pane store", async () => {
-    const closeActivePane = vi.spyOn(paneStore, "closeActivePane").mockResolvedValue();
-    const focusPane = vi.spyOn(paneStore, "focusPane").mockImplementation(() => {});
+  it("renders pane close button and closes the clicked pane directly", async () => {
+    const closePaneById = vi.spyOn(paneStore, "closePaneById").mockResolvedValue();
 
     const tabId = tabStore.createTab();
     const paneId = tabStore.activeTab?.activePane;
@@ -106,7 +105,6 @@ describe("TerminalPane", () => {
     const closeButton = await screen.findByTestId(`close-pane-${paneId}`);
     fireEvent.click(closeButton);
 
-    expect(focusPane).toHaveBeenCalledWith(paneId);
-    expect(closeActivePane).toHaveBeenCalled();
+    expect(closePaneById).toHaveBeenCalledWith(paneId);
   });
 });

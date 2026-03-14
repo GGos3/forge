@@ -106,10 +106,16 @@ export default function TerminalPane(props: TerminalPaneProps) {
         class="forge-terminal-pane__close"
         data-testid={`close-pane-${props.paneId}`}
         title="Close Pane"
+        draggable={false}
+        onPointerDown={(e) => {
+          e.stopPropagation();
+        }}
+        onMouseDown={(e) => {
+          e.stopPropagation();
+        }}
         onClick={(e) => {
           e.stopPropagation();
-          paneStore.focusPane(props.paneId);
-          void paneStore.closeActivePane();
+          void paneStore.closePaneById(props.paneId);
         }}
       >
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
