@@ -115,6 +115,13 @@ export default function TabBar() {
     setDragOverTabId(null);
   };
 
+  const cancelInteractiveDrag = (e: MouseEvent | PointerEvent | DragEvent) => {
+    e.stopPropagation();
+    if ("preventDefault" in e) {
+      e.preventDefault();
+    }
+  };
+
   return (
     <>
       <div class="forge-tab-bar" data-testid="tab-bar">
@@ -146,6 +153,10 @@ export default function TabBar() {
                 <button
                   class="forge-tab-close"
                   data-testid={`close-tab-${tab.id}`}
+                  draggable={false}
+                  onPointerDown={cancelInteractiveDrag}
+                  onMouseDown={cancelInteractiveDrag}
+                  onDragStart={cancelInteractiveDrag}
                   onClick={(e) => {
                     e.stopPropagation();
                     void tabStore.closeTab(tab.id);

@@ -274,7 +274,7 @@ export default function Terminal(props: TerminalProps) {
   return (
     <div
       ref={focusHostRef}
-      style={{ position: "relative", width: "100%", height: "100%" }}
+      style={{ position: "relative", width: "100%", height: "100%", "-webkit-app-region": "no-drag" }}
       tabIndex={-1}
       data-testid="terminal-focus-host"
       onMouseDown={() => {
@@ -282,7 +282,7 @@ export default function Terminal(props: TerminalProps) {
         terminal?.focus();
       }}
     >
-      <div ref={containerRef} class="forge-terminal-surface" data-testid="terminal-surface" />
+      <div ref={containerRef} class="forge-terminal-surface" data-testid="terminal-surface" style={{ "-webkit-app-region": "no-drag" }} />
       <BlockOverlay blocks={blocks()} />
     </div>
   );
