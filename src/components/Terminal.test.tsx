@@ -25,6 +25,10 @@ interface MockTerminal {
   element: any;
 }
 
+interface MockBufferLine {
+  isWrapped: boolean;
+}
+
 interface MockFitAddon {
   fit: ReturnType<typeof vi.fn>;
 }
@@ -89,7 +93,16 @@ vi.mock("@xterm/xterm", () => ({
     onScroll = vi.fn();
     onKey = vi.fn();
     registerMarker = vi.fn();
-    buffer = { active: { baseY: 0, viewportY: 0, cursorY: 0 } };
+    lines: MockBufferLine[] = Array.from({ length: 200 }, () => ({ isWrapped: false }));
+    buffer = {
+      active: {
+        baseY: 0,
+        viewportY: 0,
+        cursorY: 0,
+        length: this.lines.length,
+        getLine: vi.fn((index: number) => this.lines[index]),
+      },
+    };
     element = { clientHeight: 100 };
 
     constructor() {
