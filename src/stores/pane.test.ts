@@ -66,6 +66,27 @@ describe("pane store", () => {
     expect(invoke).toHaveBeenCalledWith("close_session", { session_id: "session-new" });
   });
 
+  it("closePaneById closes the clicked pane directly", async () => {
+    await paneStore.splitActivePane("horizontal");
+
+    const tabBeforeClose = activeTabOrThrow();
+    if (tabBeforeClose.root.type !== "split" || tabBeforeClose.root.second.type !== "terminal") {
+      throw new Error("Expected split with second terminal");
+    }
+
+    const secondPaneId = tabBeforeClose.root.second.id;
+    tabStore.setTerminalSessionId(tabBeforeClose.id, secondPaneId, { value: "session-clicked" } as SessionId);
+    paneStore.focusPane(tabBeforeClose.root.first.id);
+
+    vi.clearAllMocks();
+
+    await paneStore.closePaneById(secondPaneId);
+    const tab = activeTabOrThrow();
+
+    expect(tab.root.type).toBe("terminal");
+    expect(invoke).toHaveBeenCalledWith("close_session", { session_id: "session-clicked" });
+  });
+
   it("focusPane changes active pane when pane exists", async () => {
     vi.mocked(invoke).mockResolvedValueOnce("session-new");
     await paneStore.splitActivePane("vertical");

@@ -97,6 +97,34 @@ export const paneStore = {
     tabStore.setTabPaneTree(activeTab.id, nextTree, nextActivePane);
   },
 
+  async closePaneById(id: PaneId): Promise<void> {
+    const activeTab = tabStore.activeTab;
+    if (!activeTab) {
+      return;
+    }
+
+    if (!findPane(activeTab.root, id)) {
+      return;
+    }
+
+    const nextTree = closePane(activeTab.root, id);
+    if (!nextTree) {
+      await tabStore.closeTab(activeTab.id);
+      return;
+    }
+
+    const removedSessions = getRemovedTerminalSessionIds(activeTab.root, nextTree);
+
+    for (const sessionId of removedSessions.filter((session) => !isPendingSessionId(session))) {
+      await invoke("close_session", { session_id: sessionId.value });
+      sessionStore.removeSession(sessionId);
+    }
+
+    const terminals = getAllTerminalPanes(nextTree);
+    const nextActivePane = terminals[0]?.id ?? activeTab.activePane;
+    tabStore.setTabPaneTree(activeTab.id, nextTree, nextActivePane);
+  },
+
   focusPane(id: PaneId): void {
     const activeTab = tabStore.activeTab;
     if (!activeTab) {
