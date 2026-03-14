@@ -31,6 +31,7 @@ export default function Terminal(props: TerminalProps) {
   let lastWriteStatusValue = "idle";
   let lastOutputBytesValue = 0;
   let lastRawHexValue = "";
+  let hasSeenOsc133 = false;
 
   const currentTerminalTheme = () => ({
     background: getComputedStyle(document.documentElement).getPropertyValue("--surface-1").trim() || "#1e1e2e",
@@ -266,7 +267,10 @@ export default function Terminal(props: TerminalProps) {
 
       const rawBytes = new Uint8Array(event.payload.data);
       const str = textDecoder.decode(rawBytes);
-      lastRawHexValue = Array.from(rawBytes.slice(0, 80)).map(b => b.toString(16).padStart(2, "0")).join(" ");
+      if (str.includes("\x1b]133;")) {
+        hasSeenOsc133 = true;
+      }
+      lastRawHexValue = (hasSeenOsc133 ? "OSC133=YES " : "OSC133=NO ") + Array.from(rawBytes.slice(0, 80)).map(b => b.toString(16).padStart(2, "0")).join(" ");
       const preWriteRow = cursorRow();
       const prevBlockId = blockParser.getCurrentBlock()?.id;
       blockParser.feed(str);
