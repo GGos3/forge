@@ -190,4 +190,18 @@ export const tabStore = {
       })
     );
   },
+
+  reorderTab(fromIndex: number, toIndex: number) {
+    if (fromIndex === toIndex) return;
+
+    setState(
+      produce((s) => {
+        if (fromIndex < 0 || fromIndex >= s.tabs.length) return;
+        if (toIndex < 0 || toIndex >= s.tabs.length) return;
+
+        const [moved] = s.tabs.splice(fromIndex, 1);
+        s.tabs.splice(toIndex, 0, moved);
+      })
+    );
+  },
 };

@@ -1,6 +1,6 @@
 import { createStore } from "solid-js/store";
 
-export type SidebarSection = "explorer" | "connections";
+export type SidebarSection = "explorer" | "connections" | "snippets" | "transfers" | "portforward" | "settings";
 
 interface SidebarState {
   activeSection: SidebarSection;

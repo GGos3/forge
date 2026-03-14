@@ -10,6 +10,7 @@ import type {
   SshConnectionLifecycleEvent,
   SshConnectionStatusPayload,
 } from "../types/connection";
+import { recentConnectionsStore } from "./recentConnections";
 
 export interface HostKeyVerificationEvent {
   id: string;
@@ -253,6 +254,7 @@ export const connectionStore = {
         })
       );
       setConnectionStatus(profileId, "connected");
+      recentConnectionsStore.recordConnection(profile);
     } catch (e) {
       setConnectionStatus(profileId, "error", e instanceof Error ? e.message : String(e));
     }

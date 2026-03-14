@@ -1,5 +1,5 @@
 import { Component, For } from "solid-js";
-import { VsFiles, VsRemote } from "solid-icons/vs";
+import { VsFiles, VsRemote, VsCode, VsCloudUpload, VsPlug, VsSettingsGear } from "solid-icons/vs";
 import { sidebarStore, type SidebarSection } from "../stores/sidebar";
 
 interface NavItem {
@@ -11,6 +11,10 @@ interface NavItem {
 const navItems: NavItem[] = [
   { id: "explorer", icon: VsFiles, label: "Explorer" },
   { id: "connections", icon: VsRemote, label: "Connections" },
+  { id: "snippets", icon: VsCode, label: "Snippets" },
+  { id: "transfers", icon: VsCloudUpload, label: "Transfers" },
+  { id: "portforward", icon: VsPlug, label: "Port Forwarding" },
+  { id: "settings", icon: VsSettingsGear, label: "Settings" },
 ];
 
 const NavRail: Component = () => {

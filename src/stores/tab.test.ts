@@ -124,6 +124,33 @@ describe("tab store", () => {
     expect(tabStore.activeTabId).toBe(id3);
   });
 
+  it("reorders tabs", () => {
+    tabStore.reset();
+    const id1 = tabStore.createTab();
+    const id2 = tabStore.createTab();
+    const id3 = tabStore.createTab();
+
+    expect(tabStore.tabs.map((t) => t.id)).toEqual([id1, id2, id3]);
+
+    tabStore.reorderTab(0, 2);
+    expect(tabStore.tabs.map((t) => t.id)).toEqual([id2, id3, id1]);
+
+    tabStore.reorderTab(2, 0);
+    expect(tabStore.tabs.map((t) => t.id)).toEqual([id1, id2, id3]);
+  });
+
+  it("ignores out-of-bounds reorder", () => {
+    tabStore.reset();
+    const id1 = tabStore.createTab();
+    const id2 = tabStore.createTab();
+
+    tabStore.reorderTab(-1, 0);
+    expect(tabStore.tabs.map((t) => t.id)).toEqual([id1, id2]);
+
+    tabStore.reorderTab(0, 5);
+    expect(tabStore.tabs.map((t) => t.id)).toEqual([id1, id2]);
+  });
+
   it("sets default tab title based on shell", () => {
     tabStore.reset();
     const bashId = tabStore.createTab("bash");

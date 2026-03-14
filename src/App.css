@@ -5,6 +5,9 @@
 @import './styles/editor.css';
 @import './styles/explorer.css';
 @import './styles/connection.css';
+@import './styles/snippet.css';
+@import './styles/transfer.css';
+@import './styles/settings.css';
 @import './styles/sidebar.css';
 
 .forge-updater-banner {

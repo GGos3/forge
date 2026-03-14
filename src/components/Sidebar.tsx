@@ -3,6 +3,10 @@ import { invoke } from "@tauri-apps/api/core";
 import NavRail from "./NavRail";
 import FileTree from "./FileTree";
 import ConnectionList from "./ConnectionList";
+import SnippetList from "./SnippetList";
+import TransferPanel from "./TransferPanel";
+import PortForwardPanel from "./PortForwardPanel";
+import SettingsPanel from "./SettingsPanel";
 import PaneDivider from "./PaneDivider";
 import { sidebarStore } from "../stores/sidebar";
 import { explorerStore } from "../stores/explorer";
@@ -137,6 +141,22 @@ const Sidebar: Component = () => {
 
             <Match when={sidebarStore.activeSection === "connections"}>
               <ConnectionList />
+            </Match>
+
+            <Match when={sidebarStore.activeSection === "snippets"}>
+              <SnippetList />
+            </Match>
+
+            <Match when={sidebarStore.activeSection === "transfers"}>
+              <TransferPanel />
+            </Match>
+
+            <Match when={sidebarStore.activeSection === "portforward"}>
+              <PortForwardPanel />
+            </Match>
+
+            <Match when={sidebarStore.activeSection === "settings"}>
+              <SettingsPanel />
             </Match>
           </Switch>
         </div>

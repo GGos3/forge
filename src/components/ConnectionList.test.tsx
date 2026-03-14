@@ -101,21 +101,21 @@ describe("ConnectionList", () => {
     });
   });
 
-  it("renders group header for profiles with a group", async () => {
+  it("renders group node for profiles with a group", async () => {
     const profileWithGroup: SshProfile = { ...sampleProfile, id: "2", group: "Production" };
     vi.mocked(invoke).mockResolvedValueOnce(undefined);
     await connectionStore.saveProfile(profileWithGroup);
 
     const { getByTestId } = render(() => <ConnectionList />);
-    expect(getByTestId("group-header-Production")).toBeTruthy();
+    expect(getByTestId("group-Production")).toBeTruthy();
   });
 
-  it("does not render group header for profiles without a group", async () => {
+  it("does not render group node for profiles without a group", async () => {
     vi.mocked(invoke).mockResolvedValueOnce(undefined);
     await connectionStore.saveProfile(sampleProfile);
 
-    const { queryByTestId } = render(() => <ConnectionList />);
-    expect(queryByTestId(/group-header/)).toBeNull();
+    const { container } = render(() => <ConnectionList />);
+    expect(container.querySelector("[data-testid^='group-']")).toBeNull();
   });
 
   it("shows Browse Files button only for connected profiles", async () => {

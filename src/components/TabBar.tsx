@@ -1,7 +1,9 @@
 import { For, Show, createSignal, onCleanup, onMount } from "solid-js";
+import { VsTerminalLinux } from "solid-icons/vs";
 import { tabStore } from "../stores/tab";
 import NewTabDialog from "./NewTabDialog";
 import type { ShellType } from "../types/session";
+import type { TabId } from "../types/tab";
 import {
   getCloseTabShortcutLabel,
   getCurrentPlatform,
@@ -15,6 +17,8 @@ import {
 
 export default function TabBar() {
   const [showNewTabDialog, setShowNewTabDialog] = createSignal(false);
+  const [dragTabId, setDragTabId] = createSignal<TabId | null>(null);
+  const [dragOverTabId, setDragOverTabId] = createSignal<TabId | null>(null);
   const platform = getCurrentPlatform();
   const closeTabShortcutLabel = getCloseTabShortcutLabel(platform);
   const newTabShortcutLabel = getNewTabShortcutLabel(platform);
@@ -68,41 +72,105 @@ export default function TabBar() {
     setShowNewTabDialog(false);
   };
 
+  const handleDragStart = (tabId: TabId, e: DragEvent) => {
+    setDragTabId(tabId);
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", tabId);
+    }
+  };
+
+  const handleDragOver = (tabId: TabId, e: DragEvent) => {
+    e.preventDefault();
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = "move";
+    }
+    if (dragTabId() && dragTabId() !== tabId) {
+      setDragOverTabId(tabId);
+    }
+  };
+
+  const handleDragLeave = () => {
+    setDragOverTabId(null);
+  };
+
+  const handleDrop = (targetTabId: TabId, e: DragEvent) => {
+    e.preventDefault();
+    const sourceTabId = dragTabId();
+    if (!sourceTabId || sourceTabId === targetTabId) return;
+
+    const fromIndex = tabStore.tabs.findIndex((t) => t.id === sourceTabId);
+    const toIndex = tabStore.tabs.findIndex((t) => t.id === targetTabId);
+
+    if (fromIndex >= 0 && toIndex >= 0) {
+      tabStore.reorderTab(fromIndex, toIndex);
+    }
+
+    setDragTabId(null);
+    setDragOverTabId(null);
+  };
+
+  const handleDragEnd = () => {
+    setDragTabId(null);
+    setDragOverTabId(null);
+  };
+
   return (
     <>
       <div class="forge-tab-bar" data-testid="tab-bar">
-        <For each={tabStore.tabs}>
-          {(tab) => (
-            <div
-              class="forge-tab"
-              data-testid={`tab-${tab.id}`}
-              data-active={tabStore.activeTabId === tab.id}
-              onClick={() => tabStore.switchTab(tab.id)}
-            >
-              <span class="forge-tab-title">
-                {tab.title}
-              </span>
-              <button
-                class="forge-tab-close"
-                data-testid={`close-tab-${tab.id}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  void tabStore.closeTab(tab.id);
+        <div class="forge-tab-bar__tabs">
+          <For each={tabStore.tabs}>
+            {(tab) => (
+              <div
+                class="forge-tab"
+                classList={{
+                  "forge-tab--dragging": dragTabId() === tab.id,
+                  "forge-tab--drag-over": dragOverTabId() === tab.id,
                 }}
-                title={`Close Tab (${closeTabShortcutLabel})`}
+                data-testid={`tab-${tab.id}`}
+                data-active={tabStore.activeTabId === tab.id}
+                draggable={true}
+                onClick={() => tabStore.switchTab(tab.id)}
+                onDragStart={(e) => handleDragStart(tab.id, e)}
+                onDragOver={(e) => handleDragOver(tab.id, e)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(tab.id, e)}
+                onDragEnd={handleDragEnd}
               >
-                ✕
-              </button>
-            </div>
-          )}
-        </For>
+                <span class="forge-tab__icon">
+                  <VsTerminalLinux size={14} />
+                </span>
+                <span class="forge-tab-title">
+                  {tab.title}
+                </span>
+                <button
+                  class="forge-tab-close"
+                  data-testid={`close-tab-${tab.id}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    void tabStore.closeTab(tab.id);
+                  }}
+                  title={`Close Tab (${closeTabShortcutLabel})`}
+                >
+                  <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <line x1="2" y1="2" x2="10" y2="10" />
+                    <line x1="10" y1="2" x2="2" y2="10" />
+                  </svg>
+                </button>
+              </div>
+            )}
+          </For>
+        </div>
         <button
           class="forge-tab-new"
           data-testid="new-tab-button"
           onClick={() => setShowNewTabDialog(true)}
           title={`New Tab (${newTabShortcutLabel})`}
         >
-          +
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
         </button>
       </div>
 

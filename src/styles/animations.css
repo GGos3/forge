@@ -83,3 +83,24 @@
 .forge-transition-all {
   transition: all var(--duration-normal) var(--ease-default);
 }
+
+@keyframes forge-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-2px); }
+  80% { transform: translateX(2px); }
+}
+
+@keyframes forge-slide-in-left {
+  from { transform: translateX(12px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.forge-animate-shake {
+  animation: forge-shake var(--duration-normal) var(--ease-default);
+}
+
+.forge-animate-slide-in-left {
+  animation: forge-slide-in-left var(--duration-normal) var(--ease-out) both;
+}

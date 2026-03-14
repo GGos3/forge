@@ -32,3 +32,33 @@ export interface SshConnectionLifecycleEvent {
   status: "connected" | "disconnected";
   reason?: string;
 }
+
+export interface RecentConnection {
+  profileId: string;
+  profileName: string;
+  host: string;
+  port: number;
+  username: string;
+  lastConnected: number;
+}
+
+export interface QuickConnectParsed {
+  username: string;
+  host: string;
+  port: number;
+}
+
+export interface GroupNode {
+  name: string;
+  fullPath: string;
+  children: GroupNode[];
+  profiles: SshProfile[];
+}
+
+export interface SshSnippet {
+  id: string;
+  name: string;
+  command: string;
+  description?: string;
+  tags?: string[];
+}

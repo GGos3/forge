@@ -1,10 +1,12 @@
 import { For, onCleanup, onMount, Show } from "solid-js";
 import PaneContainer from "./components/PaneContainer";
 import TabBar from "./components/TabBar";
+import StatusBar from "./components/StatusBar";
 import Sidebar from "./components/Sidebar";
 import HostKeyVerificationDialog from "./components/HostKeyVerificationDialog";
 import InlineEditor from "./components/InlineEditor";
 import UpdaterBanner from "./components/UpdaterBanner";
+import ShortcutOverlay, { setIsShortcutOverlayOpen, isShortcutOverlayOpen } from "./components/ShortcutOverlay";
 import { tabStore } from "./stores/tab";
 import { paneStore } from "./stores/pane";
 import { sidebarStore } from "./stores/sidebar";
@@ -13,6 +15,7 @@ import { connectionStore, ensureHostKeyListener } from "./stores/connection";
 import {
   getCurrentPlatform,
   getPaneFocusDirection,
+  isMacPlatform,
   matchesClosePaneShortcut,
   matchesHorizontalSplitShortcut,
   matchesVerticalSplitShortcut,
@@ -31,6 +34,18 @@ function App() {
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      const isShortcutToggle =
+        e.key === "/" &&
+        !e.shiftKey &&
+        !e.altKey &&
+        (isMacPlatform(platform) ? e.metaKey && !e.ctrlKey : e.ctrlKey && !e.metaKey);
+
+      if (isShortcutToggle) {
+        e.preventDefault();
+        setIsShortcutOverlayOpen(!isShortcutOverlayOpen());
+        return;
+      }
+
       if (matchesToggleSidebarShortcut(e, platform)) {
         e.preventDefault();
         sidebarStore.togglePanel();
@@ -124,9 +139,11 @@ function App() {
           </For>
         </div>
       </div>
+      <StatusBar />
       <Show when={connectionStore.pendingHostKeyVerification}>
         <HostKeyVerificationDialog onClose={handleHostKeyVerificationClose} />
       </Show>
+      <ShortcutOverlay />
     </main>
   );
 }

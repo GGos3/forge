@@ -1,15 +1,118 @@
+.forge-connection-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.forge-connection-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.forge-connection-header__title {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.forge-quick-connect {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+}
+
+.forge-quick-connect__input-row {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+}
+
+.forge-quick-connect__input {
+  flex: 1;
+  height: 28px;
+  padding: 0 var(--space-2);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  outline: none;
+  transition: border-color var(--duration-fast) var(--ease-default);
+}
+
+.forge-quick-connect__input::placeholder {
+  color: var(--text-muted);
+}
+
+.forge-quick-connect__input:focus {
+  border-color: var(--accent);
+}
+
+.forge-quick-connect__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--text-on-accent, #fff);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity var(--duration-fast) var(--ease-default);
+}
+
+.forge-quick-connect__btn:hover {
+  opacity: 0.85;
+}
+
+.forge-quick-connect__btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.forge-quick-connect__error {
+  margin-top: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--error);
+}
+
 .forge-connection-list {
+  flex: 1;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   box-sizing: border-box;
 }
 
+.forge-connection-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-1) var(--space-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.forge-connection-section__label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 .forge-connection-item {
   display: flex;
   align-items: center;
-  height: var(--explorer-node-height);
-  padding: 0 var(--space-2);
+  justify-content: space-between;
+  min-height: var(--explorer-node-height);
+  padding: var(--space-1) var(--space-2);
   cursor: pointer;
   box-sizing: border-box;
   color: var(--text-primary);
@@ -25,6 +128,165 @@
 
 .forge-connection-item[data-active="true"] {
   background-color: var(--explorer-selected);
+}
+
+.forge-connection-item__info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  flex: 1;
+}
+
+.forge-connection-item__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.forge-connection-item__name {
+  font-weight: 500;
+  font-size: var(--text-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.forge-connection-item__host {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.forge-connection-item__recent-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.forge-connection-item__time {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.forge-connection-actions {
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-default);
+}
+
+.forge-connection-item:hover .forge-connection-actions {
+  opacity: 1;
+}
+
+.forge-btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--duration-fast) var(--ease-default),
+              color var(--duration-fast) var(--ease-default);
+}
+
+.forge-btn-icon:hover {
+  background: var(--surface-3);
+  color: var(--text-primary);
+}
+
+.forge-btn-icon--danger {
+  color: var(--error);
+}
+
+.forge-btn-icon--danger:hover {
+  background: var(--error-dim, rgba(244, 67, 54, 0.15));
+  color: var(--error);
+}
+
+.forge-btn-icon--xs {
+  width: 18px;
+  height: 18px;
+}
+
+.forge-connection-group__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--duration-fast) var(--ease-default);
+}
+
+.forge-connection-group__header:hover {
+  background-color: var(--explorer-hover);
+}
+
+.forge-connection-group__chevron {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform var(--duration-fast) var(--ease-default);
+}
+
+.forge-connection-group__chevron--collapsed {
+  transform: rotate(-90deg);
+}
+
+.forge-connection-group__name {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.forge-connection-group__count {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  flex-shrink: 0;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-full);
+  background: var(--surface-4);
+  min-width: 16px;
+  text-align: center;
+  line-height: 16px;
+}
+
+.forge-connection-group__children {
+  animation: forge-group-expand var(--duration-fast) var(--ease-out) both;
+}
+
+@keyframes forge-group-expand {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.forge-connection-empty {
+  padding: var(--space-4);
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: 1.5;
 }
 
 .forge-connection-dialog {

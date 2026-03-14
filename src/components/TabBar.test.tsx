@@ -233,4 +233,32 @@ describe("TabBar", () => {
     fireEvent.keyDown(document, { key: "w", metaKey: true });
     expect(tabStore.tabs.length).toBe(1);
   });
+
+  it("reorders tabs via drag and drop", () => {
+    const id1 = tabStore.createTab();
+    const id2 = tabStore.createTab();
+    const id3 = tabStore.createTab();
+
+    expect(tabStore.tabs.map((t) => t.id)).toEqual([id1, id2, id3]);
+
+    const { getByTestId } = render(() => <TabBar />);
+
+    const tab1 = getByTestId(`tab-${id1}`);
+    const tab3 = getByTestId(`tab-${id3}`);
+
+    fireEvent.dragStart(tab1, { dataTransfer: { effectAllowed: "", setData: () => {} } });
+    fireEvent.dragOver(tab3, { dataTransfer: { dropEffect: "" } });
+    fireEvent.drop(tab3, { dataTransfer: {} });
+    fireEvent.dragEnd(tab1);
+
+    expect(tabStore.tabs.map((t) => t.id)).toEqual([id2, id3, id1]);
+  });
+
+  it("renders tabs as draggable", () => {
+    const id1 = tabStore.createTab();
+    const { getByTestId } = render(() => <TabBar />);
+
+    const tab = getByTestId(`tab-${id1}`);
+    expect(tab.getAttribute("draggable")).toBe("true");
+  });
 });

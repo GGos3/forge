@@ -1,4 +1,4 @@
-import { createSignal, onMount, onCleanup, Show } from "solid-js";
+import { createSignal, createMemo, onMount, onCleanup, Show, For } from "solid-js";
 import { connectionStore } from "../stores/connection";
 import type { SshProfile, SshAuthMethod } from "../types/connection";
 
@@ -27,6 +27,19 @@ export default function ConnectionManager(props: ConnectionManagerProps) {
   const [saving, setSaving] = createSignal(false);
   const [testStatus, setTestStatus] = createSignal<"idle" | "testing" | "ok" | "fail">("idle");
   const [testMessage, setTestMessage] = createSignal("");
+
+  const existingGroups = createMemo(() => {
+    const groups = new Set<string>();
+    for (const p of connectionStore.profiles) {
+      if (p.group?.trim()) {
+        const segments = p.group.trim().split("/");
+        for (let i = 1; i <= segments.length; i++) {
+          groups.add(segments.slice(0, i).join("/"));
+        }
+      }
+    }
+    return [...groups].sort();
+  });
 
   onMount(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -192,10 +205,16 @@ export default function ConnectionManager(props: ConnectionManagerProps) {
               type="text"
               value={group()}
               onInput={(e) => setGroup(e.currentTarget.value)}
-              placeholder="Production"
+              placeholder="Production/US-East"
               class="forge-input"
               data-testid="input-group"
+              list="conn-group-suggestions"
             />
+            <datalist id="conn-group-suggestions">
+              <For each={existingGroups()}>
+                {(g) => <option value={g} />}
+              </For>
+            </datalist>
           </div>
 
           <div style={{ display: "flex", "flex-direction": "column", gap: "4px" }}>
