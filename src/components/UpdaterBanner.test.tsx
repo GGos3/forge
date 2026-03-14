@@ -58,8 +58,9 @@ describe("UpdaterBanner", () => {
 
     fireEvent.click(screen.getByTestId("updater-install"));
 
+    const expectedChannel = import.meta.env.VITE_FORGE_RELEASE_CHANNEL === "dev" ? "dev" : "prod";
     await waitFor(() => {
-      expect(invokeMock).toHaveBeenCalledWith("install_update", { channel: "prod" });
+      expect(invokeMock).toHaveBeenCalledWith("install_update", { channel: expectedChannel });
     });
   });
 });
