@@ -115,7 +115,6 @@ export default function TerminalPane(props: TerminalPaneProps) {
         }}
         onClick={(e) => {
           e.stopPropagation();
-          console.log("[forge-debug] close pane click", { tabId: props.tabId, paneId: props.paneId });
           void paneStore.closePaneById(props.paneId);
         }}
       >

@@ -56,12 +56,6 @@ pub fn write_to_session(
     session_id: SessionId,
     data: Vec<u8>,
 ) -> Result<(), String> {
-    eprintln!(
-        "[forge-debug] write_to_session session={:?} bytes={}",
-        session_id,
-        data.len()
-    );
-
     let mut manager = state
         .session_manager
         .lock()
