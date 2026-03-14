@@ -262,6 +262,7 @@ export default function Terminal(props: TerminalProps) {
       }
 
       const str = textDecoder.decode(new Uint8Array(event.payload.data));
+      const preWriteRow = cursorRow();
       const prevBlockId = blockParser.getCurrentBlock()?.id;
       blockParser.feed(str);
       const newBlockId = blockParser.getCurrentBlock()?.id;
@@ -270,7 +271,7 @@ export default function Terminal(props: TerminalProps) {
         syncDebugState(undefined, undefined, undefined, event.payload.data.length);
 
         if (newBlockId && newBlockId !== prevBlockId && !blockStartRows.has(newBlockId)) {
-          blockStartRows.set(newBlockId, cursorRow());
+          blockStartRows.set(newBlockId, preWriteRow);
         }
 
         updateBlocksUI();
