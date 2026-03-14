@@ -13,6 +13,10 @@ mod ssh;
 mod types;
 mod watcher;
 
+#[cfg(target_os = "macos")]
+const MACOS_SAFARI_USER_AGENT: &str =
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15";
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
@@ -23,6 +27,19 @@ pub fn run() {
         .plugin(tauri_plugin_process::init())
         .setup(|app| {
             credentials::ensure_default_storage_dir()?;
+
+            #[cfg(target_os = "macos")]
+            {
+                let main_window = app.get_webview_window("main").unwrap();
+                main_window.with_webview(|webview| unsafe {
+                    use objc2_foundation::NSString;
+                    use objc2_web_kit::WKWebView;
+
+                    let view: &WKWebView = &*webview.inner().cast();
+                    let user_agent = NSString::from_str(MACOS_SAFARI_USER_AGENT);
+                    view.setCustomUserAgent(Some(&user_agent));
+                })?;
+            }
 
             let salt_path = credentials::stronghold_salt_path();
             app.handle().plugin(
