@@ -215,7 +215,7 @@ describe("Terminal", () => {
     });
   });
 
-  it("re-focuses terminal on mouse interaction", async () => {
+  it("re-focuses terminal on pointer interaction", async () => {
     const { getByTestId } = render(() =>
       createComponent(Terminal, { sessionId: { value: "session-3" } as SessionId, focused: false })
     );
@@ -224,7 +224,7 @@ describe("Terminal", () => {
     const terminal = mockState.terminalInstances[0];
     terminal.focus.mockClear();
 
-    fireEvent.mouseDown(getByTestId("terminal-focus-host"));
+    fireEvent.pointerDown(getByTestId("terminal-focus-host"));
 
     await waitFor(() => expect(terminal.focus).toHaveBeenCalled());
   });

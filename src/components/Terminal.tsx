@@ -26,7 +26,6 @@ function getSessionValue(sessionId: SessionId | string): string {
 export default function Terminal(props: TerminalProps) {
   let containerRef: HTMLDivElement | undefined;
   let terminal: XTerm | null = null;
-  let focusHostRef: HTMLDivElement | undefined;
 
   const currentTerminalTheme = () => ({
     background: getComputedStyle(document.documentElement).getPropertyValue("--surface-1").trim() || "#1e1e2e",
@@ -37,6 +36,11 @@ export default function Terminal(props: TerminalProps) {
   });
   
   const [blocks, setBlocks] = createSignal<BlockUiItem[]>([]);
+
+  const focusNativeTerminalInput = () => {
+    const textarea = containerRef?.querySelector("textarea") as HTMLTextAreaElement | null | undefined;
+    textarea?.focus({ preventScroll: true });
+  };
 
   onMount(() => {
     if (!containerRef) {
@@ -137,8 +141,7 @@ export default function Terminal(props: TerminalProps) {
     }
 
     const focusTerminal = () => {
-      console.log("[forge-debug] terminal focus request", { sessionId: sessionValue, focusedProp: props.focused });
-      focusHostRef?.focus({ preventScroll: true });
+      focusNativeTerminalInput();
       xterm.focus();
     };
 
@@ -146,24 +149,17 @@ export default function Terminal(props: TerminalProps) {
       focusTerminal();
     }
 
-    const handleMouseDown = () => {
-      console.log("[forge-debug] terminal container mousedown", { sessionId: sessionValue });
-      queueMicrotask(() => {
-        focusTerminal();
-      });
+    const handlePointerDown = () => {
+      focusTerminal();
     };
 
-    containerRef.addEventListener("mousedown", handleMouseDown);
+    containerRef.addEventListener("pointerdown", handlePointerDown);
 
     const inputDisposable = xterm.onData((data) => {
-      console.log("[forge-debug] xterm onData", { sessionId: sessionValue, data, length: data.length });
-
       if (exited) {
-        console.log("[forge-debug] xterm onData ignored after exit", { sessionId: sessionValue });
         return;
       }
 
-      console.log("[forge-debug] invoke write_to_session", { sessionId: sessionValue, bytes: textEncoder.encode(data).length });
       void invoke("write_to_session", {
         session_id: sessionValue,
         data: Array.from(textEncoder.encode(data)),
@@ -243,7 +239,7 @@ export default function Terminal(props: TerminalProps) {
     onCleanup(() => {
       disposed = true;
       exited = true;
-      containerRef?.removeEventListener("mousedown", handleMouseDown);
+      containerRef?.removeEventListener("pointerdown", handlePointerDown);
       resizeObserver?.disconnect();
       outputUnlisten?.();
       exitUnlisten?.();
@@ -255,7 +251,7 @@ export default function Terminal(props: TerminalProps) {
 
   createEffect(() => {
     if (props.focused) {
-      console.log("[forge-debug] props.focused effect", { sessionId: getSessionValue(props.sessionId) });
+      focusNativeTerminalInput();
       terminal?.focus();
     }
   });
@@ -280,13 +276,10 @@ export default function Terminal(props: TerminalProps) {
 
   return (
     <div
-      ref={focusHostRef}
       style={{ position: "relative", width: "100%", height: "100%", "-webkit-app-region": "no-drag" }}
-      tabIndex={-1}
       data-testid="terminal-focus-host"
-      onMouseDown={() => {
-        console.log("[forge-debug] terminal focus host mousedown", { sessionId: getSessionValue(props.sessionId) });
-        focusHostRef?.focus({ preventScroll: true });
+      onPointerDown={() => {
+        focusNativeTerminalInput();
         terminal?.focus();
       }}
     >
