@@ -32,7 +32,7 @@ russh-keys = "0.57"
 
 # File system operations
 notify = { version = "7", features = ["macos_fsevent"] }
-git2 = "0.19"
+git2 = { version = "0.19", default-features = false, features = ["https", "ssh", "vendored-libgit2", "vendored-openssl"] }
 dirs = "6"
 # Async support
 async-trait = "0.1"
