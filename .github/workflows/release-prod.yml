@@ -71,6 +71,7 @@ jobs:
         run: echo "VITE_FORGE_RELEASE_CHANNEL=prod" >> "$GITHUB_ENV"
 
       - name: Run verification
+        shell: bash
         run: |
           if [ "${{ matrix.platform }}" != "windows-latest" ]; then pnpm test:run; fi
           pnpm build
