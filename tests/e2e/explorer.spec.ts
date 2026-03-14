@@ -149,8 +149,10 @@ test("explorer connects to a remote workspace and resets after disconnect", asyn
   await expect(getExplorerNode(page, `${remoteFixtureRoot}/src`)).toBeVisible();
   await expect(getExplorerNode(page, `${remoteFixtureRoot}/README.md`).locator(".forge-git-badge")).toHaveCount(0);
 
+  await page.getByTestId("nav-connections").click();
   await page.getByTitle("Disconnect").click();
 
+  await page.getByTestId("nav-explorer").click();
   await expect(page.getByTestId("explorer-error-banner")).toHaveText(
     "SSH connection lost. Reconnect and reopen the remote workspace."
   );
