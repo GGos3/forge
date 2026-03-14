@@ -1,14 +1,13 @@
 import { For, onCleanup, onMount, Show } from "solid-js";
 import PaneContainer from "./components/PaneContainer";
 import TabBar from "./components/TabBar";
-import ExplorerSidebar from "./components/ExplorerSidebar";
-import PaneDivider from "./components/PaneDivider";
+import Sidebar from "./components/Sidebar";
 import HostKeyVerificationDialog from "./components/HostKeyVerificationDialog";
 import InlineEditor from "./components/InlineEditor";
 import UpdaterBanner from "./components/UpdaterBanner";
 import { tabStore } from "./stores/tab";
 import { paneStore } from "./stores/pane";
-import { explorerStore } from "./stores/explorer";
+import { sidebarStore } from "./stores/sidebar";
 import { editorStore } from "./stores/editor";
 import { connectionStore, ensureHostKeyListener } from "./stores/connection";
 import {
@@ -34,7 +33,7 @@ function App() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (matchesToggleSidebarShortcut(e, platform)) {
         e.preventDefault();
-        explorerStore.toggleSidebar();
+        sidebarStore.togglePanel();
         return;
       }
 
@@ -73,13 +72,6 @@ function App() {
     });
   });
 
-  const handleSidebarResize = (ratio: number) => {
-    const mainContent = document.querySelector(".forge-main-content");
-    if (!mainContent) return;
-    const parentWidth = mainContent.getBoundingClientRect().width;
-    explorerStore.setSidebarWidth(ratio * parentWidth);
-  };
-
   const handleHostKeyVerificationClose = () => {
     connectionStore.clearPendingHostKeyVerification();
   };
@@ -88,10 +80,9 @@ function App() {
     editorStore.updateContent(nextContent);
     try {
       await editorStore.saveFile();
-      explorerStore.clearError();
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      explorerStore.setError(message);
+      console.error("Save failed:", message);
     }
   };
 
@@ -100,14 +91,7 @@ function App() {
       <UpdaterBanner />
       <TabBar />
       <div class="forge-main-content" style={{ display: "flex", flex: 1, height: "100%", width: "100%", overflow: "hidden" }}>
-        <Show when={explorerStore.isVisible}>
-          <ExplorerSidebar width={explorerStore.width} />
-          <PaneDivider 
-            direction="vertical" 
-            ratio={0} 
-            onRatioChange={handleSidebarResize} 
-          />
-        </Show>
+        <Sidebar />
         <div class="forge-viewport">
           <Show when={editorStore.activeBuffer}>
             {(buffer) => (

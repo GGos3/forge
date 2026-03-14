@@ -1,0 +1,156 @@
+.forge-sidebar {
+  display: flex;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.forge-nav-rail {
+  display: flex;
+  flex-direction: column;
+  width: var(--nav-rail-width);
+  min-width: var(--nav-rail-width);
+  background-color: var(--nav-rail-bg);
+  border-right: 1px solid var(--border-subtle);
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.forge-nav-rail__items {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) 0;
+}
+
+.forge-nav-rail__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  border-left: 2px solid transparent;
+  color: var(--nav-rail-icon);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: color var(--duration-fast) var(--ease-default),
+              background-color var(--duration-fast) var(--ease-default);
+}
+
+.forge-nav-rail__button:hover {
+  color: var(--nav-rail-icon-active);
+  background-color: var(--surface-4);
+}
+
+.forge-nav-rail__button--active {
+  color: var(--nav-rail-icon-active);
+  border-left-color: var(--nav-rail-indicator);
+  background-color: var(--surface-3);
+}
+
+.forge-sidebar-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: var(--explorer-min-width);
+  max-width: var(--explorer-max-width);
+  height: 100%;
+  background-color: var(--surface-2);
+  border-right: 1px solid var(--border);
+  box-sizing: border-box;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.forge-sidebar-panel__header {
+  display: flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 var(--space-3);
+  background-color: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  box-sizing: border-box;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.forge-sidebar-panel__title {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.forge-sidebar-panel__subtitle {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100px;
+}
+
+.forge-sidebar-panel__actions {
+  margin-left: auto;
+  display: flex;
+  gap: var(--space-1);
+}
+
+.forge-sidebar-panel__action-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-xs);
+  border-radius: var(--radius-sm);
+  transition: background-color var(--duration-fast) var(--ease-default),
+              color var(--duration-fast) var(--ease-default);
+}
+
+.forge-sidebar-panel__action-btn:hover {
+  background: var(--surface-4);
+  color: var(--text-primary);
+}
+
+.forge-sidebar-panel__action-btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-on-accent);
+}
+
+.forge-sidebar-panel__action-btn--primary:hover {
+  background: var(--accent-hover);
+}
+
+.forge-sidebar-panel__content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.forge-sidebar-panel__error {
+  padding: var(--space-2) var(--space-3);
+  background: var(--error-muted);
+  color: var(--error);
+  font-size: var(--text-sm);
+  border-bottom: 1px solid var(--error);
+}
+
+.forge-sidebar-panel__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+  gap: var(--space-3);
+}
+
+.forge-sidebar-panel__empty p {
+  margin: 0;
+}

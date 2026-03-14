@@ -4,6 +4,7 @@ import ExplorerSidebar from "../ExplorerSidebar";
 import App from "../../App";
 import { explorerStore } from "../../stores/explorer";
 import { editorStore } from "../../stores/editor";
+import { sidebarStore } from "../../stores/sidebar";
 
 vi.mock("@tauri-apps/api/core", () => ({
   invoke: vi.fn(),
@@ -194,12 +195,13 @@ describe("App Sidebar Integration", () => {
   beforeEach(() => {
     document.body.innerHTML = "";
     explorerStore.reset();
+    sidebarStore._resetForTesting();
   });
 
-  it("toggles sidebar visibility on Ctrl+B", () => {
+  it("toggles sidebar panel on Ctrl+B", () => {
     render(() => <App />);
-    
-    expect(screen.queryByTestId("explorer-sidebar")).toBeNull();
+
+    expect(screen.queryByTestId("sidebar-panel")).toBeNull();
 
     fireEvent.keyDown(window, {
       key: "b",
@@ -209,7 +211,7 @@ describe("App Sidebar Integration", () => {
       altKey: false,
     });
 
-    expect(screen.queryByTestId("explorer-sidebar")).toBeTruthy();
+    expect(screen.queryByTestId("sidebar-panel")).toBeTruthy();
 
     fireEvent.keyDown(window, {
       key: "b",
@@ -219,19 +221,31 @@ describe("App Sidebar Integration", () => {
       altKey: false,
     });
 
-    expect(screen.queryByTestId("explorer-sidebar")).toBeNull();
+    expect(screen.queryByTestId("sidebar-panel")).toBeNull();
   });
 
-  it("resizes sidebar when pane divider emits ratio change", () => {
-    explorerStore.toggleSidebar();
+  it("nav rail is always visible", () => {
     render(() => <App />);
-    
-    const sidebar = screen.getByTestId("explorer-sidebar");
-    expect(sidebar.style.width).toBe("260px");
+    expect(screen.getByTestId("nav-rail")).toBeTruthy();
+  });
 
-    const divider = screen.getAllByTestId("pane-divider").find(
-      (el) => el.classList.contains("forge-pane-divider-vertical")
-    );
-    expect(divider).toBeTruthy();
+  it("clicking nav item opens corresponding panel", () => {
+    render(() => <App />);
+
+    fireEvent.click(screen.getByTestId("nav-explorer"));
+    expect(screen.queryByTestId("sidebar-panel")).toBeTruthy();
+
+    fireEvent.click(screen.getByTestId("nav-connections"));
+    expect(screen.queryByTestId("sidebar-panel")).toBeTruthy();
+  });
+
+  it("clicking same nav item again closes the panel", () => {
+    render(() => <App />);
+
+    fireEvent.click(screen.getByTestId("nav-explorer"));
+    expect(screen.queryByTestId("sidebar-panel")).toBeTruthy();
+
+    fireEvent.click(screen.getByTestId("nav-explorer"));
+    expect(screen.queryByTestId("sidebar-panel")).toBeNull();
   });
 });

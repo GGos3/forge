@@ -5,6 +5,7 @@
 @import './styles/editor.css';
 @import './styles/explorer.css';
 @import './styles/connection.css';
+@import './styles/sidebar.css';
 
 .forge-updater-banner {
   display: flex;
