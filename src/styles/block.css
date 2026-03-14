@@ -11,57 +11,50 @@
 
 .forge-block-card {
   position: absolute;
-  left: var(--space-3);
-  right: var(--space-3);
+  left: 0;
+  right: 0;
   pointer-events: none;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-subtle);
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.02) 0%,
-    transparent 100%
-  );
+  border-radius: 0;
+  border: none;
+  border-right: 3px solid transparent;
+  background: none;
   transition: border-color var(--duration-fast) var(--ease-default),
               box-shadow var(--duration-fast) var(--ease-default);
 }
 
 .forge-block-card:hover {
-  border-color: var(--border);
-  box-shadow: var(--shadow-sm);
+  background: rgba(255, 255, 255, 0.015);
 }
 
 .forge-block-card--success {
-  border-left: 3px solid var(--success);
+  border-left: 2px solid var(--success);
 }
 
 .forge-block-card--error {
-  border-left: 3px solid var(--error);
-  background: linear-gradient(
-    180deg,
-    var(--error-muted) 0%,
-    transparent 40%
-  );
+  border-left: 2px solid var(--error);
 }
 
 .forge-block-card--running {
-  border-left: 3px solid var(--warning);
-  background: linear-gradient(
-    180deg,
-    var(--warning-muted) 0%,
-    transparent 40%
-  );
+  border-left: 2px solid var(--warning);
 }
 
 .forge-block-card__header {
   pointer-events: auto;
+  position: absolute;
+  top: 0;
+  right: 0;
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  background: var(--surface-3);
-  border-bottom: 1px solid var(--border-subtle);
-  min-height: 28px;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--surface-3) 92%, transparent);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid var(--border-subtle);
+  max-width: 50%;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-default);
 }
 
 .forge-block-card__status {
@@ -131,13 +124,22 @@
 
 .forge-block-actions {
   pointer-events: auto;
+  position: absolute;
+  bottom: 0;
+  right: 0;
   display: flex;
   gap: var(--space-1);
-  padding: var(--space-1) var(--space-3);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--surface-3) 92%, transparent);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid var(--border-subtle);
   opacity: 0;
   transition: opacity var(--duration-fast) var(--ease-default);
 }
 
+.forge-block-card:hover .forge-block-card__header,
 .forge-block-card:hover .forge-block-actions,
 .forge-block-actions:focus-within {
   opacity: 1;
