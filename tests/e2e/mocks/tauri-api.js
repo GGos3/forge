@@ -480,7 +480,7 @@ export async function invoke(command, args) {
       return sessionId;
     }
     case "write_to_session": {
-      const sessionId = args?.session_id;
+      const sessionId = args?.sessionId;
       const session = sessions.get(sessionId);
       if (!session) throw new Error("Unknown session: " + sessionId);
       handleSessionInput(session, decodeInput(args?.data));
@@ -499,7 +499,7 @@ export async function invoke(command, args) {
       return null;
     }
     case "close_session": {
-      const sessionId = args?.session_id;
+      const sessionId = args?.sessionId;
       const session = sessions.get(sessionId);
       if (session) {
         session.alive = false;

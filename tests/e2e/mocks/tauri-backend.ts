@@ -474,7 +474,7 @@ export async function invokeMock<T>(command: string, args?: Record<string, unkno
       return sessionId as T;
     }
     case "write_to_session": {
-      const sessionId = typeof args?.session_id === "string" ? args.session_id : "";
+      const sessionId = typeof args?.sessionId === "string" ? args.sessionId : "";
       const session = state.sessions.get(sessionId);
       if (!session) {
         throw new Error(`Unknown session: ${sessionId}`);
@@ -497,7 +497,7 @@ export async function invokeMock<T>(command: string, args?: Record<string, unkno
       return null as T;
     }
     case "close_session": {
-      const sessionId = typeof args?.session_id === "string" ? args.session_id : "";
+      const sessionId = typeof args?.sessionId === "string" ? args.sessionId : "";
       const session = state.sessions.get(sessionId);
       if (session) {
         session.alive = false;

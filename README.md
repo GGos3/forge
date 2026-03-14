@@ -232,6 +232,7 @@ pnpm test:run && pnpm build && cargo check --manifest-path src-tauri/Cargo.toml
 - `main` is the primary branch
 - push feature work to your private remote first
 - use the CI workflow to validate frontend build, Vitest, Playwright, and Rust tests/checks
+- later: re-evaluate a Bun migration only after Vitest, Playwright, and CI frozen-lockfile behavior are stable enough for this Tauri workflow
 
 ## Recommended IDE setup
 
