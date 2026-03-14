@@ -111,20 +111,21 @@ export const tabStore = {
         const index = s.tabs.findIndex((t) => t.id === id);
         if (index === -1) return;
 
-        if (s.tabs.length === 1) {
-          const shell = s.tabs[index].root.type === "terminal" ? s.tabs[index].root.shell : undefined;
-          const nextRoot = createPendingRootPane(shell);
-          s.tabs[index] = {
-            ...s.tabs[index],
-            title: getDefaultTabTitle(shell),
-            root: nextRoot,
-            activePane: nextRoot.id,
-          };
-          s.activeTabId = s.tabs[index].id;
+        s.tabs.splice(index, 1);
+
+        if (s.tabs.length === 0) {
+          const replacementShell = tab.root.type === "terminal" ? tab.root.shell : undefined;
+          const replacementTabId = `tab-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+          const replacementRoot = createPendingRootPane(replacementShell);
+          s.tabs.push({
+            id: replacementTabId,
+            title: getDefaultTabTitle(replacementShell),
+            root: replacementRoot,
+            activePane: replacementRoot.id,
+          });
+          s.activeTabId = replacementTabId;
           return;
         }
-
-        s.tabs.splice(index, 1);
 
         if (s.activeTabId === id) {
           const newActiveIndex = index > 0 ? index - 1 : 0;

@@ -42,7 +42,7 @@ describe("tab store", () => {
     expect(tab?.title).toBe("Server Logs");
   });
 
-  it("resets the last tab to a fresh terminal when closed", async () => {
+  it("closes the last visible tab and replaces it with a fresh tab", async () => {
     const id = tabStore.createTab();
     const allIds = tabStore.tabs.map((t) => t.id);
     for (const tId of allIds) {
@@ -54,7 +54,7 @@ describe("tab store", () => {
     expect(tabStore.tabs.length).toBe(1);
     await tabStore.closeTab(id);
     expect(tabStore.tabs.length).toBe(1);
-    expect(tabStore.tabs[0].id).toBe(id);
+    expect(tabStore.tabs[0].id).not.toBe(id);
     expect(tabStore.tabs[0].root.type).toBe("terminal");
     if (tabStore.tabs[0].root.type === "terminal") {
       expect(tabStore.tabs[0].root.sessionId.value.startsWith("pending-session-")).toBe(true);
