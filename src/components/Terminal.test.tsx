@@ -1,4 +1,4 @@
-import { render, waitFor } from "@solidjs/testing-library";
+import { fireEvent, render, waitFor } from "@solidjs/testing-library";
 import { createComponent } from "solid-js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { SessionId } from "../types/session";
@@ -213,5 +213,19 @@ describe("Terminal", () => {
         rows: 24,
       },
     });
+  });
+
+  it("re-focuses terminal on mouse interaction", async () => {
+    const { getByTestId } = render(() =>
+      createComponent(Terminal, { sessionId: { value: "session-3" } as SessionId, focused: false })
+    );
+
+    await waitFor(() => expect(mockState.terminalInstances).toHaveLength(1));
+    const terminal = mockState.terminalInstances[0];
+    terminal.focus.mockClear();
+
+    fireEvent.mouseDown(getByTestId("terminal-focus-host"));
+
+    await waitFor(() => expect(terminal.focus).toHaveBeenCalled());
   });
 });

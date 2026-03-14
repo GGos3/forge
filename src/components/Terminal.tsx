@@ -26,6 +26,7 @@ function getSessionValue(sessionId: SessionId | string): string {
 export default function Terminal(props: TerminalProps) {
   let containerRef: HTMLDivElement | undefined;
   let terminal: XTerm | null = null;
+  let focusHostRef: HTMLDivElement | undefined;
 
   const currentTerminalTheme = () => ({
     background: getComputedStyle(document.documentElement).getPropertyValue("--surface-1").trim() || "#1e1e2e",
@@ -135,15 +136,22 @@ export default function Terminal(props: TerminalProps) {
       } catch {}
     }
 
-    if (props.focused) {
+    const focusTerminal = () => {
+      focusHostRef?.focus({ preventScroll: true });
       xterm.focus();
+    };
+
+    if (props.focused) {
+      focusTerminal();
     }
 
-    containerRef.addEventListener("mousedown", () => {
+    const handleMouseDown = () => {
       queueMicrotask(() => {
-        xterm.focus();
+        focusTerminal();
       });
-    });
+    };
+
+    containerRef.addEventListener("mousedown", handleMouseDown);
 
     const inputDisposable = xterm.onData((data) => {
       if (exited) {
@@ -229,6 +237,7 @@ export default function Terminal(props: TerminalProps) {
     onCleanup(() => {
       disposed = true;
       exited = true;
+      containerRef?.removeEventListener("mousedown", handleMouseDown);
       resizeObserver?.disconnect();
       outputUnlisten?.();
       exitUnlisten?.();
@@ -263,7 +272,16 @@ export default function Terminal(props: TerminalProps) {
   });
 
   return (
-    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+    <div
+      ref={focusHostRef}
+      style={{ position: "relative", width: "100%", height: "100%" }}
+      tabIndex={-1}
+      data-testid="terminal-focus-host"
+      onMouseDown={() => {
+        focusHostRef?.focus({ preventScroll: true });
+        terminal?.focus();
+      }}
+    >
       <div ref={containerRef} class="forge-terminal-surface" data-testid="terminal-surface" />
       <BlockOverlay blocks={blocks()} />
     </div>
