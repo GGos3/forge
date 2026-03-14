@@ -245,20 +245,20 @@ export default function Terminal(props: TerminalProps) {
   });
 
   createEffect(() => {
-    if (!terminal) {
+    const font = settingsStore.settings.fontFamily;
+    const size = settingsStore.settings.fontSize;
+    const cursor = settingsStore.settings.cursorStyle;
+    const scroll = settingsStore.settings.scrollback;
+    void settingsStore.settings.colorTheme;
+
+    if (!terminal?.options) {
       return;
     }
 
-    settingsStore.settings.fontFamily;
-    settingsStore.settings.fontSize;
-    settingsStore.settings.cursorStyle;
-    settingsStore.settings.scrollback;
-    settingsStore.settings.colorTheme;
-
-    terminal.options.fontFamily = settingsStore.settings.fontFamily;
-    terminal.options.fontSize = settingsStore.settings.fontSize;
-    terminal.options.cursorStyle = settingsStore.settings.cursorStyle;
-    terminal.options.scrollback = settingsStore.settings.scrollback;
+    terminal.options.fontFamily = font;
+    terminal.options.fontSize = size;
+    terminal.options.cursorStyle = cursor;
+    terminal.options.scrollback = scroll;
     terminal.options.theme = currentTerminalTheme();
   });
 
