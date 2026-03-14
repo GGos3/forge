@@ -2,7 +2,6 @@ import { createEffect, createSignal, onCleanup, onMount } from "solid-js";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { Terminal as XTerm } from "@xterm/xterm";
-import type { IMarker } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import { WebglAddon } from "@xterm/addon-webgl";
 import "@xterm/xterm/css/xterm.css";
@@ -127,7 +126,6 @@ export default function Terminal(props: TerminalProps) {
     let resizeObserver: ResizeObserver | undefined;
 
     const blockParser = new BlockParser();
-    const markers = new Map<string, IMarker>();
 
     const updateBlocksUI = () => {
       if (!terminal) return;
@@ -144,18 +142,14 @@ export default function Terminal(props: TerminalProps) {
 
       for (let i = 0; i < blocksToRender.length; i++) {
         const b = blocksToRender[i];
-        const marker = markers.get(b.id);
-        if (!marker) continue;
-
         const nextBlock = blocksToRender[i + 1];
-        const nextMarker = nextBlock ? markers.get(nextBlock.id) : null;
-        
-        // Render top based on marker line
-        const relativeRow = marker.line - viewportY;
+        const startRow = Math.max(0, b.startLine - 1);
+        const endRow = nextBlock
+          ? Math.max(startRow + 1, nextBlock.startLine - 1)
+          : Math.max(startRow + 1, b.endLine);
+
+        const relativeRow = startRow - viewportY;
         const top = relativeRow * cellHeight;
-        
-        // Calculate height up to next block or bottom of buffer
-        const endRow = nextMarker ? nextMarker.line : terminal.buffer.active.baseY + terminal.buffer.active.cursorY + 1;
         const relativeEndRow = endRow - viewportY;
         const height = (relativeEndRow - relativeRow) * cellHeight;
 
@@ -265,28 +259,10 @@ export default function Terminal(props: TerminalProps) {
       }
 
       const str = textDecoder.decode(new Uint8Array(event.payload.data));
-      const prevBlockId = blockParser.getCurrentBlock()?.id;
-      
       blockParser.feed(str);
-      const currentBlockId = blockParser.getCurrentBlock()?.id;
 
       xterm.write(new Uint8Array(event.payload.data), () => {
         syncDebugState(undefined, undefined, undefined, event.payload.data.length);
-        if (currentBlockId && currentBlockId !== prevBlockId) {
-          const m = xterm.registerMarker(0);
-          if (m) {
-            markers.set(currentBlockId, m);
-          }
-        } else if (!currentBlockId && blockParser.getBlocks().length > 0) {
-          // If block finalized in this chunk and we missed it, try to ensure we have markers for completed
-          const lastCompleted = blockParser.getBlocks()[blockParser.getBlocks().length - 1];
-          if (!markers.has(lastCompleted.id)) {
-            const m = xterm.registerMarker(0);
-            if (m) {
-              markers.set(lastCompleted.id, m);
-            }
-          }
-        }
         updateBlocksUI();
       });
     }).then((unlisten) => {
