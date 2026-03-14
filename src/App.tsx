@@ -12,6 +12,7 @@ import { paneStore } from "./stores/pane";
 import { sidebarStore } from "./stores/sidebar";
 import { editorStore } from "./stores/editor";
 import { connectionStore, ensureHostKeyListener } from "./stores/connection";
+import { settingsStore } from "./stores/settings";
 import {
   getCurrentPlatform,
   getPaneFocusDirection,
@@ -25,6 +26,7 @@ import "./App.css";
 
 function App() {
   onMount(() => {
+    settingsStore.load();
     void ensureHostKeyListener();
 
     const platform = getCurrentPlatform();

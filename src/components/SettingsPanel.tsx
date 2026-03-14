@@ -1,51 +1,15 @@
 import { createSignal, onMount, Show } from "solid-js";
-
-interface ForgeSettings {
-  fontFamily: string;
-  fontSize: number;
-  cursorStyle: "block" | "underline" | "bar";
-  scrollback: number;
-  copyOnSelect: boolean;
-}
-
-const STORAGE_KEY = "forge-settings";
-
-function loadSettings(): ForgeSettings {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      return { ...defaultSettings, ...JSON.parse(stored) as Partial<ForgeSettings> };
-    }
-  } catch { void 0; }
-  return { ...defaultSettings };
-}
-
-function saveSettings(settings: ForgeSettings): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-  } catch { void 0; }
-}
-
-const defaultSettings: ForgeSettings = {
-  fontFamily: "JetBrains Mono",
-  fontSize: 14,
-  cursorStyle: "block",
-  scrollback: 5000,
-  copyOnSelect: false,
-};
+import { settingsStore } from "../stores/settings";
 
 export default function SettingsPanel() {
-  const [settings, setSettings] = createSignal<ForgeSettings>(loadSettings());
   const [saved, setSaved] = createSignal(false);
 
   onMount(() => {
-    setSettings(loadSettings());
+    settingsStore.load();
   });
 
-  const updateSetting = <K extends keyof ForgeSettings>(key: K, value: ForgeSettings[K]) => {
-    const updated = { ...settings(), [key]: value };
-    setSettings(updated);
-    saveSettings(updated);
+  const updateSetting = <K extends keyof typeof settingsStore.settings>(key: K, value: (typeof settingsStore.settings)[K]) => {
+    settingsStore.updateSetting(key, value);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -67,39 +31,39 @@ export default function SettingsPanel() {
 
           <div class="forge-settings-row">
             <label class="forge-settings-row__label" for="setting-font">Font Family</label>
-            <input
-              id="setting-font"
-              type="text"
-              class="forge-input"
-              value={settings().fontFamily}
-              onInput={(e) => updateSetting("fontFamily", e.currentTarget.value)}
-              data-testid="setting-font-family"
-            />
+              <input
+                id="setting-font"
+                type="text"
+                class="forge-input"
+                value={settingsStore.settings.fontFamily}
+                onInput={(e) => updateSetting("fontFamily", e.currentTarget.value)}
+                data-testid="setting-font-family"
+              />
           </div>
 
           <div class="forge-settings-row">
             <label class="forge-settings-row__label" for="setting-font-size">Font Size</label>
-            <input
-              id="setting-font-size"
-              type="number"
-              class="forge-input forge-settings-number"
-              value={settings().fontSize}
-              min={8}
-              max={32}
-              onInput={(e) => updateSetting("fontSize", parseInt(e.currentTarget.value, 10) || 14)}
+              <input
+                id="setting-font-size"
+                type="number"
+                class="forge-input forge-settings-number"
+                value={settingsStore.settings.fontSize}
+                min={8}
+                max={32}
+                onInput={(e) => updateSetting("fontSize", parseInt(e.currentTarget.value, 10) || 14)}
               data-testid="setting-font-size"
             />
           </div>
 
           <div class="forge-settings-row">
             <label class="forge-settings-row__label" for="setting-cursor">Cursor Style</label>
-            <select
-              id="setting-cursor"
-              class="forge-input"
-              value={settings().cursorStyle}
-              onChange={(e) => updateSetting("cursorStyle", e.currentTarget.value as ForgeSettings["cursorStyle"])}
-              data-testid="setting-cursor-style"
-            >
+              <select
+                id="setting-cursor"
+                class="forge-input"
+                value={settingsStore.settings.cursorStyle}
+                onChange={(e) => updateSetting("cursorStyle", e.currentTarget.value as typeof settingsStore.settings.cursorStyle)}
+                data-testid="setting-cursor-style"
+              >
               <option value="block">Block</option>
               <option value="underline">Underline</option>
               <option value="bar">Bar</option>
@@ -108,14 +72,14 @@ export default function SettingsPanel() {
 
           <div class="forge-settings-row">
             <label class="forge-settings-row__label" for="setting-scrollback">Scrollback Lines</label>
-            <input
-              id="setting-scrollback"
-              type="number"
-              class="forge-input forge-settings-number"
-              value={settings().scrollback}
-              min={1000}
-              max={100000}
-              step={1000}
+              <input
+                id="setting-scrollback"
+                type="number"
+                class="forge-input forge-settings-number"
+                value={settingsStore.settings.scrollback}
+                min={1000}
+                max={100000}
+                step={1000}
               onInput={(e) => updateSetting("scrollback", parseInt(e.currentTarget.value, 10) || 5000)}
               data-testid="setting-scrollback"
             />
@@ -123,16 +87,32 @@ export default function SettingsPanel() {
 
           <div class="forge-settings-row">
             <label class="forge-settings-row__label" for="setting-copy-select">Copy on Select</label>
-            <input
-              id="setting-copy-select"
-              type="checkbox"
-              class="forge-settings-checkbox"
-              checked={settings().copyOnSelect}
-              onChange={(e) => updateSetting("copyOnSelect", e.currentTarget.checked)}
-              data-testid="setting-copy-on-select"
-            />
+              <input
+                id="setting-copy-select"
+                type="checkbox"
+                class="forge-settings-checkbox"
+                checked={settingsStore.settings.copyOnSelect}
+                onChange={(e) => updateSetting("copyOnSelect", e.currentTarget.checked)}
+                data-testid="setting-copy-on-select"
+              />
+            </div>
+
+            <div class="forge-settings-row">
+              <label class="forge-settings-row__label" for="setting-color-theme">App Color</label>
+              <select
+                id="setting-color-theme"
+                class="forge-input"
+                value={settingsStore.settings.colorTheme}
+                onChange={(e) => updateSetting("colorTheme", e.currentTarget.value as typeof settingsStore.settings.colorTheme)}
+                data-testid="setting-color-theme"
+              >
+                <option value="purple">Purple</option>
+                <option value="blue">Blue</option>
+                <option value="green">Green</option>
+                <option value="amber">Amber</option>
+              </select>
+            </div>
           </div>
-        </div>
 
         <div class="forge-settings-section">
           <h3 class="forge-settings-section__title">About</h3>

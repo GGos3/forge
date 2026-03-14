@@ -33,6 +33,15 @@ const [state, setState] = createStore<UpdaterState>({
 
 let hasChecked = false;
 
+function normalizeUpdaterError(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+function isIgnorableStartupError(message: string): boolean {
+  const normalized = message.toLowerCase();
+  return normalized.includes("valid release json") || normalized.includes("latest.json") || normalized.includes("release json from remote");
+}
+
 export const updaterStore = {
   get channel() {
     return state.channel;
@@ -84,7 +93,12 @@ export const updaterStore = {
         });
       }
     } catch (error) {
-      setState({ error: error instanceof Error ? error.message : String(error) });
+      const message = normalizeUpdaterError(error);
+      if (force || !isIgnorableStartupError(message)) {
+        setState({ error: message });
+      } else {
+        setState({ error: null, available: false, version: null, currentVersion: null, notes: null });
+      }
     } finally {
       setState({ checking: false });
     }

@@ -122,7 +122,7 @@ http://localhost:1420
 
 ```bash
 export PATH="$HOME/.cargo/bin:$PATH"
-pnpm tauri dev
+pnpm dev:desktop
 ```
 
 This launches the Tauri window and uses the Rust PTY backend.

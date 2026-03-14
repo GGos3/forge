@@ -9,6 +9,7 @@ import "@xterm/xterm/css/xterm.css";
 import type { SessionExitEvent, SessionId, SessionOutputEvent } from "../types/session";
 import { BlockParser } from "../models/block-parser";
 import BlockOverlay, { BlockUiItem } from "./BlockOverlay";
+import { settingsStore } from "../stores/settings";
 
 interface TerminalProps {
   sessionId: SessionId;
@@ -25,6 +26,14 @@ function getSessionValue(sessionId: SessionId | string): string {
 export default function Terminal(props: TerminalProps) {
   let containerRef: HTMLDivElement | undefined;
   let terminal: XTerm | null = null;
+
+  const currentTerminalTheme = () => ({
+    background: getComputedStyle(document.documentElement).getPropertyValue("--surface-1").trim() || "#1e1e2e",
+    foreground: getComputedStyle(document.documentElement).getPropertyValue("--text-primary").trim() || "#e0e0e6",
+    cursor: getComputedStyle(document.documentElement).getPropertyValue("--text-primary").trim() || "#e0e0e6",
+    selectionBackground: getComputedStyle(document.documentElement).getPropertyValue("--terminal-selection").trim() || "rgba(124, 91, 245, 0.3)",
+    selectionInactiveBackground: getComputedStyle(document.documentElement).getPropertyValue("--terminal-selection-inactive").trim() || "rgba(124, 91, 245, 0.1)",
+  });
   
   const [blocks, setBlocks] = createSignal<BlockUiItem[]>([]);
 
@@ -37,15 +46,11 @@ export default function Terminal(props: TerminalProps) {
     const xterm = new XTerm({
       cursorBlink: true,
       convertEol: true,
-      fontFamily: "'JetBrains Mono', 'Fira Code', 'SF Mono', 'Cascadia Code', 'Consolas', monospace",
-      fontSize: 14,
-      theme: {
-        background: "#1e1e2e",
-        foreground: "#e0e0e6",
-        cursor: "#e0e0e6",
-        selectionBackground: "rgba(124, 91, 245, 0.3)",
-        selectionInactiveBackground: "rgba(124, 91, 245, 0.1)",
-      },
+      fontFamily: settingsStore.settings.fontFamily,
+      fontSize: settingsStore.settings.fontSize,
+      cursorStyle: settingsStore.settings.cursorStyle,
+      scrollback: settingsStore.settings.scrollback,
+      theme: currentTerminalTheme(),
     });
     terminal = xterm;
     const fitAddon = new FitAddon();
@@ -133,6 +138,12 @@ export default function Terminal(props: TerminalProps) {
     if (props.focused) {
       xterm.focus();
     }
+
+    containerRef.addEventListener("mousedown", () => {
+      queueMicrotask(() => {
+        xterm.focus();
+      });
+    });
 
     const inputDisposable = xterm.onData((data) => {
       if (exited) {
@@ -231,6 +242,24 @@ export default function Terminal(props: TerminalProps) {
     if (props.focused) {
       terminal?.focus();
     }
+  });
+
+  createEffect(() => {
+    if (!terminal) {
+      return;
+    }
+
+    settingsStore.settings.fontFamily;
+    settingsStore.settings.fontSize;
+    settingsStore.settings.cursorStyle;
+    settingsStore.settings.scrollback;
+    settingsStore.settings.colorTheme;
+
+    terminal.options.fontFamily = settingsStore.settings.fontFamily;
+    terminal.options.fontSize = settingsStore.settings.fontSize;
+    terminal.options.cursorStyle = settingsStore.settings.cursorStyle;
+    terminal.options.scrollback = settingsStore.settings.scrollback;
+    terminal.options.theme = currentTerminalTheme();
   });
 
   return (

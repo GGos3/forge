@@ -41,6 +41,16 @@ describe("UpdaterBanner", () => {
     });
   });
 
+  it("suppresses noisy startup release json errors", async () => {
+    invokeMock.mockRejectedValue(new Error("Could not fetch a valid release JSON from remote"));
+
+    render(() => <UpdaterBanner />);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("updater-error")).toBeNull();
+    });
+  });
+
   it("runs install when button is clicked", async () => {
     invokeMock
       .mockResolvedValueOnce({

@@ -6,6 +6,7 @@ import { findPane } from "../models/pane-tree";
 import type { PaneId } from "../types/pane";
 import type { SessionId, ShellType } from "../types/session";
 import type { TabId } from "../types/tab";
+import { paneStore } from "../stores/pane";
 import Terminal from "./Terminal";
 
 interface TerminalPaneProps {
@@ -100,6 +101,22 @@ export default function TerminalPane(props: TerminalPaneProps) {
 
   return (
     <div class="forge-terminal-pane" data-testid="terminal-pane">
+      <button
+        type="button"
+        class="forge-terminal-pane__close"
+        data-testid={`close-pane-${props.paneId}`}
+        title="Close Pane"
+        onClick={(e) => {
+          e.stopPropagation();
+          paneStore.focusPane(props.paneId);
+          void paneStore.closeActivePane();
+        }}
+      >
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+          <line x1="2" y1="2" x2="10" y2="10" />
+          <line x1="10" y1="2" x2="2" y2="10" />
+        </svg>
+      </button>
       <Show when={!loading()} fallback={<div class="forge-terminal-status">Starting terminal...</div>}>
         <Show when={!error()} fallback={<div class="forge-terminal-status forge-terminal-error">{error()}</div>}>
           <Show when={sessionId()}>{(activeSessionId) => <Terminal sessionId={activeSessionId()} focused={props.focused} />}</Show>

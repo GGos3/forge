@@ -1,8 +1,9 @@
-import { render, screen, waitFor } from "@solidjs/testing-library";
+import { fireEvent, render, screen, waitFor } from "@solidjs/testing-library";
 import { createComponent } from "solid-js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { shellStore } from "../stores/shell";
 import { tabStore } from "../stores/tab";
+import { paneStore } from "../stores/pane";
 import type { SessionId } from "../types/session";
 
 vi.mock("@tauri-apps/api/core", () => ({
@@ -86,5 +87,26 @@ describe("TerminalPane", () => {
       expect(screen.getByText("Terminal pane not found")).toBeDefined();
     });
     expect(invoke).not.toHaveBeenCalled();
+  });
+
+  it("renders pane close button and routes close through pane store", async () => {
+    const closeActivePane = vi.spyOn(paneStore, "closeActivePane").mockResolvedValue();
+    const focusPane = vi.spyOn(paneStore, "focusPane").mockImplementation(() => {});
+
+    const tabId = tabStore.createTab();
+    const paneId = tabStore.activeTab?.activePane;
+    if (!paneId) {
+      throw new Error("Expected root pane id");
+    }
+
+    tabStore.setTerminalSessionId(tabId, paneId, { value: "session-existing" } as SessionId);
+
+    render(() => createComponent(TerminalPane, { tabId, paneId, focused: false }));
+
+    const closeButton = await screen.findByTestId(`close-pane-${paneId}`);
+    fireEvent.click(closeButton);
+
+    expect(focusPane).toHaveBeenCalledWith(paneId);
+    expect(closeActivePane).toHaveBeenCalled();
   });
 });

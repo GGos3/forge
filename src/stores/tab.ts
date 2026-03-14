@@ -32,6 +32,17 @@ function isPendingSessionId(sessionId: SessionId): boolean {
   return sessionId.value.startsWith("pending-session-");
 }
 
+function createPendingRootPane(shell?: ShellType): TerminalPane {
+  const newPaneId = `pane-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+
+  return {
+    type: "terminal",
+    id: newPaneId,
+    sessionId: { value: `pending-session-${newPaneId}` } as SessionId,
+    shell,
+  };
+}
+
 export const tabStore = {
   get tabs() {
     return state.tabs;
@@ -58,20 +69,13 @@ export const tabStore = {
 
   createTab(shell?: ShellType) {
     const newTabId = `tab-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-    const newPaneId = `pane-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-
-    const rootPane: TerminalPane = {
-      type: "terminal",
-      id: newPaneId,
-      sessionId: { value: `pending-session-${newPaneId}` } as SessionId,
-      shell,
-    };
+    const rootPane = createPendingRootPane(shell);
 
     const newTab: Tab = {
       id: newTabId,
       title: getDefaultTabTitle(shell),
       root: rootPane,
-      activePane: newPaneId,
+      activePane: rootPane.id,
     };
 
     setState(
@@ -86,7 +90,7 @@ export const tabStore = {
 
   async closeTab(id: TabId) {
     const tab = state.tabs.find((entry) => entry.id === id);
-    if (!tab || state.tabs.length === 1) {
+    if (!tab) {
       return;
     }
 
@@ -108,6 +112,15 @@ export const tabStore = {
         if (index === -1) return;
 
         if (s.tabs.length === 1) {
+          const shell = s.tabs[index].root.type === "terminal" ? s.tabs[index].root.shell : undefined;
+          const nextRoot = createPendingRootPane(shell);
+          s.tabs[index] = {
+            ...s.tabs[index],
+            title: getDefaultTabTitle(shell),
+            root: nextRoot,
+            activePane: nextRoot.id,
+          };
+          s.activeTabId = s.tabs[index].id;
           return;
         }
 

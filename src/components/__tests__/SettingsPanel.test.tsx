@@ -31,6 +31,18 @@ describe("SettingsPanel", () => {
     expect(parsed.fontSize).toBe(16);
   });
 
+  it("renders and saves app color theme", () => {
+    render(() => <SettingsPanel />);
+
+    const select = screen.getByTestId("setting-color-theme") as HTMLSelectElement;
+    fireEvent.change(select, { target: { value: "green" } });
+
+    const stored = localStorage.getItem("forge-settings");
+    expect(stored).toBeTruthy();
+    const parsed = JSON.parse(stored!) as { colorTheme: string };
+    expect(parsed.colorTheme).toBe("green");
+  });
+
   it("shows saved indicator after changing a setting", async () => {
     render(() => <SettingsPanel />);
 

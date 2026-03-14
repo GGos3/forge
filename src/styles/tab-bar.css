@@ -118,6 +118,7 @@
   transition: opacity var(--duration-fast) var(--ease-default),
               background-color var(--duration-fast) var(--ease-default),
               color var(--duration-fast) var(--ease-default);
+  -webkit-app-region: no-drag;
 }
 
 .forge-tab:hover .forge-tab-close,
