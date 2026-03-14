@@ -161,7 +161,10 @@ fn default_master_password_seed() -> String {
                 .filter(|value| !value.is_empty())
         })
         .unwrap_or_else(|| "unknown-host".to_string());
-    let uid = unsafe { libc::geteuid() };
+    #[cfg(unix)]
+    let uid = unsafe { libc::geteuid() } as u32;
+    #[cfg(not(unix))]
+    let uid = std::process::id();
 
     format!("forge::{user}::{uid}::{host}::{home}")
 }

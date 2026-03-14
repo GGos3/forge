@@ -173,6 +173,33 @@ impl SshConnector for RusshConnector {
     }
 }
 
+#[cfg(windows)]
+async fn connect_windows_ssh_agent(
+) -> Result<
+    keys::agent::client::AgentClient<tokio::net::windows::named_pipe::NamedPipeClient>,
+    String,
+> {
+    const OPENSSH_AGENT_PIPE: &str = r"\\.\pipe\openssh-ssh-agent";
+    const ERROR_PIPE_BUSY: i32 = 231;
+
+    let stream = loop {
+        match tokio::net::windows::named_pipe::ClientOptions::new().open(OPENSSH_AGENT_PIPE) {
+            Ok(client) => break client,
+            Err(e) if e.raw_os_error() == Some(ERROR_PIPE_BUSY) => {
+                tokio::time::sleep(Duration::from_millis(50)).await;
+            }
+            Err(e) => {
+                return Err(format!(
+                    "failed to connect to OpenSSH agent ({}): {e}",
+                    OPENSSH_AGENT_PIPE
+                ));
+            }
+        }
+    };
+
+    Ok(keys::agent::client::AgentClient::connect(stream))
+}
+
 async fn authenticate(
     handle: &mut Handle<SshClientHandler>,
     request: &SshConnectRequest,
@@ -217,9 +244,16 @@ async fn authenticate(
                 .map_err(|e| format!("public key authentication failed: {e}"))?
         }
         SshAuthMethod::Agent => {
+            #[cfg(unix)]
             let mut agent = keys::agent::client::AgentClient::connect_env()
                 .await
                 .map_err(|e| format!("failed to connect to ssh-agent: {e}"))?;
+
+            #[cfg(windows)]
+            let mut agent = connect_windows_ssh_agent().await?;
+
+            #[cfg(not(any(unix, windows)))]
+            return Err("SSH agent authentication is not supported on this platform".to_string());
 
             let identities = agent
                 .request_identities()
