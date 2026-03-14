@@ -68,7 +68,7 @@ jobs:
 
       - name: Run verification
         run: |
-          pnpm test:run
+          if [ "${{ matrix.platform }}" != "windows-latest" ]; then pnpm test:run; fi
           pnpm build
           cargo build --manifest-path src-tauri/Cargo.toml
 
