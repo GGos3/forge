@@ -29,6 +29,8 @@ export default function Terminal(props: TerminalProps) {
   let terminal: XTerm | null = null;
   let lastPointerTargetValue = "none";
   let lastInputValue = "";
+  let lastWriteStatusValue = "idle";
+  let lastOutputBytesValue = 0;
 
   const currentTerminalTheme = () => ({
     background: getComputedStyle(document.documentElement).getPropertyValue("--surface-1").trim() || "#1e1e2e",
@@ -46,14 +48,22 @@ export default function Terminal(props: TerminalProps) {
     activeClass: "",
     lastPointerTarget: "none",
     lastInput: "",
+    lastWriteStatus: "idle",
+    lastOutputBytes: 0,
   });
 
-  const syncDebugState = (nextPointerTarget?: string, nextInput?: string) => {
+  const syncDebugState = (nextPointerTarget?: string, nextInput?: string, nextWriteStatus?: string, nextOutputBytes?: number) => {
     if (nextPointerTarget !== undefined) {
       lastPointerTargetValue = nextPointerTarget;
     }
     if (nextInput !== undefined) {
       lastInputValue = nextInput;
+    }
+    if (nextWriteStatus !== undefined) {
+      lastWriteStatusValue = nextWriteStatus;
+    }
+    if (nextOutputBytes !== undefined) {
+      lastOutputBytesValue = nextOutputBytes;
     }
 
     const activeElement = document.activeElement as HTMLElement | null;
@@ -64,6 +74,8 @@ export default function Terminal(props: TerminalProps) {
       activeClass: activeElement?.className ?? "",
       lastPointerTarget: lastPointerTargetValue,
       lastInput: lastInputValue,
+      lastWriteStatus: lastWriteStatusValue,
+      lastOutputBytes: lastOutputBytesValue,
     });
   };
 
@@ -73,17 +85,22 @@ export default function Terminal(props: TerminalProps) {
     syncDebugState();
   };
 
-  const sendInputToSession = (sessionValue: string, data: string) => {
+  const sendInputToSession = async (sessionValue: string, data: string) => {
     if (!data) {
       return;
     }
 
-    syncDebugState(undefined, JSON.stringify(data));
+    syncDebugState(undefined, JSON.stringify(data), "pending");
 
-    void invoke("write_to_session", {
-      session_id: sessionValue,
-      data: Array.from(textEncoder.encode(data)),
-    });
+    try {
+      await invoke("write_to_session", {
+        session_id: sessionValue,
+        data: Array.from(textEncoder.encode(data)),
+      });
+      syncDebugState(undefined, undefined, "ok");
+    } catch (error) {
+      syncDebugState(undefined, undefined, `error: ${error instanceof Error ? error.message : String(error)}`);
+    }
   };
 
   onMount(() => {
@@ -217,7 +234,7 @@ export default function Terminal(props: TerminalProps) {
       }
 
       event.preventDefault();
-      sendInputToSession(sessionValue, pastedText);
+      void sendInputToSession(sessionValue, pastedText);
     };
 
     containerRef.addEventListener("pointerdown", handlePointerDown);
@@ -228,7 +245,7 @@ export default function Terminal(props: TerminalProps) {
         return;
       }
 
-      sendInputToSession(sessionValue, data);
+      void sendInputToSession(sessionValue, data);
     });
 
     xterm.onKey(({ domEvent }) => {
@@ -254,6 +271,7 @@ export default function Terminal(props: TerminalProps) {
       const currentBlockId = blockParser.getCurrentBlock()?.id;
 
       xterm.write(new Uint8Array(event.payload.data), () => {
+        syncDebugState(undefined, undefined, undefined, event.payload.data.length);
         if (currentBlockId && currentBlockId !== prevBlockId) {
           const m = xterm.registerMarker(0);
           if (m) {
@@ -369,6 +387,8 @@ export default function Terminal(props: TerminalProps) {
         <div>activeClass: {debugState().activeClass || "(empty)"}</div>
         <div>lastPointer: {debugState().lastPointerTarget || "(none)"}</div>
         <div>lastInput: {debugState().lastInput || "(none)"}</div>
+        <div>writeStatus: {debugState().lastWriteStatus}</div>
+        <div>lastOutputBytes: {debugState().lastOutputBytes}</div>
       </div>
     </div>
   );
