@@ -1,5 +1,6 @@
 use portable_pty::{native_pty_system, Child, CommandBuilder, MasterPty, PtySize};
 use std::collections::HashMap;
+use std::fs;
 use std::io::{Read, Write};
 use std::path::Path;
 use std::path::PathBuf;
@@ -62,7 +63,7 @@ impl SessionManager {
             integration_dir.to_string_lossy().to_string(),
         );
 
-        let launch_config = shell_integration_launch_config(&shell, &integration_dir);
+        let launch_config = shell_integration_launch_config(&shell, &integration_dir)?;
         for (key, value) in launch_config.env {
             command.env(key, value);
         }
@@ -298,13 +299,45 @@ fn shell_integration_dir() -> PathBuf {
         .join("shell-integration")
 }
 
+fn zsh_runtime_dotdir(integration_dir: &Path) -> Result<PathBuf, String> {
+    let base_dir = dirs::data_local_dir()
+        .or_else(dirs::data_dir)
+        .unwrap_or_else(std::env::temp_dir)
+        .join("forge")
+        .join("shell-integration")
+        .join("zsh");
+
+    fs::create_dir_all(&base_dir).map_err(|e| {
+        format!(
+            "failed to create zsh runtime dir {}: {e}",
+            base_dir.display()
+        )
+    })?;
+
+    let source_zshrc = integration_dir.join(".zshrc");
+    let runtime_zshrc = base_dir.join(".zshrc");
+
+    fs::copy(&source_zshrc, &runtime_zshrc).map_err(|e| {
+        format!(
+            "failed to copy zsh runtime config from {} to {}: {e}",
+            source_zshrc.display(),
+            runtime_zshrc.display()
+        )
+    })?;
+
+    Ok(base_dir)
+}
+
 struct ShellLaunchConfig {
     args: Vec<String>,
     env: Vec<(String, String)>,
 }
 
-fn shell_integration_launch_config(shell: &ShellType, integration_dir: &Path) -> ShellLaunchConfig {
-    match shell {
+fn shell_integration_launch_config(
+    shell: &ShellType,
+    integration_dir: &Path,
+) -> Result<ShellLaunchConfig, String> {
+    Ok(match shell {
         ShellType::Bash => {
             let integration_path = integration_dir.join("bash-integration.sh");
             let rcfile_path = integration_dir.join("bashrc");
@@ -322,6 +355,7 @@ fn shell_integration_launch_config(shell: &ShellType, integration_dir: &Path) ->
         }
         ShellType::Zsh => {
             let integration_path = integration_dir.join("zsh-integration.zsh");
+            let runtime_dotdir = zsh_runtime_dotdir(integration_dir)?;
             ShellLaunchConfig {
                 args: vec!["-i".to_string()],
                 env: vec![
@@ -331,7 +365,7 @@ fn shell_integration_launch_config(shell: &ShellType, integration_dir: &Path) ->
                     ),
                     (
                         "ZDOTDIR".to_string(),
-                        integration_dir.to_string_lossy().to_string(),
+                        runtime_dotdir.to_string_lossy().to_string(),
                     ),
                 ],
             }
@@ -340,7 +374,7 @@ fn shell_integration_launch_config(shell: &ShellType, integration_dir: &Path) ->
             args: vec![],
             env: vec![],
         },
-    }
+    })
 }
 
 #[cfg(test)]
