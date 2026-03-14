@@ -6,7 +6,7 @@ test("renders block actions for completed commands", async ({ page }) => {
 
   await runCommand(page, 'echo "block-output"');
 
-  const blocks = page.getByTestId("block-overlay").locator(".forge-block-divider");
+  const blocks = page.getByTestId("block-overlay").locator(".forge-block-card");
   await expect(blocks).toHaveCount(1);
   await blocks.first().getByTitle("Copy Output").click();
 
@@ -20,6 +20,6 @@ test("marks non-zero exit blocks as errors", async ({ page }) => {
 
   await runCommand(page, "false");
 
-  const errorBlock = page.getByTestId("block-overlay").locator(".forge-block-divider").last();
-  await expect(errorBlock).toHaveClass(/forge-block-error/);
+  const errorBlock = page.getByTestId("block-overlay").locator(".forge-block-card").last();
+  await expect(errorBlock).toHaveClass(/forge-block-card--error/);
 });

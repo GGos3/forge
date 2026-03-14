@@ -16,12 +16,12 @@ test("explorer toggles from the header close button and shortcut", async ({ page
   await gotoForge(page);
   await toggleExplorer(page);
 
-  await expect(page.getByTestId("explorer-sidebar")).toBeVisible();
-  await page.getByTestId("explorer-close-btn").click();
-  await expect(page.getByTestId("explorer-sidebar")).toHaveCount(0);
+  await expect(page.getByTestId("sidebar-panel")).toBeVisible();
+  await toggleExplorer(page);
+  await expect(page.getByTestId("sidebar-panel")).toHaveCount(0);
 
   await toggleExplorer(page);
-  await expect(page.getByTestId("explorer-sidebar")).toBeVisible();
+  await expect(page.getByTestId("sidebar-panel")).toBeVisible();
   await captureEvidence(page, "task24-explorer-toggle-shortcut");
 });
 

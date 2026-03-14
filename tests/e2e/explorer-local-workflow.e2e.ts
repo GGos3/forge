@@ -8,7 +8,7 @@ test("local explorer browse open and save workflow uses IPC path", async ({ page
   await gotoForge(page);
 
   await toggleExplorer(page);
-  await expect(page.getByTestId("explorer-sidebar")).toBeVisible();
+  await expect(page.getByTestId("sidebar-panel")).toBeVisible();
 
   await page.getByTestId("explorer-open-folder-btn").click();
   await expect(page.locator('[data-path="' + `${fixtureRoot}/src` + '"]')).toBeVisible();

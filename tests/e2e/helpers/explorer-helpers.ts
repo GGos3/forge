@@ -81,11 +81,11 @@ export function getExplorerNode(page: Page, path: string): Locator {
 }
 
 export async function openLocalFixtureRoot(page: Page): Promise<void> {
-  if (!(await page.getByTestId("explorer-sidebar").isVisible().catch(() => false))) {
+  if (!(await page.getByTestId("sidebar-panel").isVisible().catch(() => false))) {
     await toggleExplorer(page);
   }
 
-  await expect(page.getByTestId("explorer-sidebar")).toBeVisible();
+  await expect(page.getByTestId("sidebar-panel")).toBeVisible();
   const emptyStateButton = page.getByTestId("explorer-empty-open-folder-btn");
 
   if (await emptyStateButton.isVisible().catch(() => false)) {
@@ -101,8 +101,9 @@ export async function saveConnectionProfile(
   page: Page,
   profile: ConnectionProfileInput
 ): Promise<ConnectionProfileRecord> {
-  await expect(page.getByTestId("explorer-sidebar")).toBeVisible();
+  await expect(page.getByTestId("sidebar-panel")).toBeVisible();
 
+  await page.getByTestId("nav-connections").click();
   await page.getByTestId("btn-new-connection").click();
   await expect(page.getByTestId("connection-manager-dialog")).toBeVisible();
 

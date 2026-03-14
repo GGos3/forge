@@ -64,7 +64,7 @@ test("editor close keeps the explorer workspace visible", async ({ page }) => {
 
   await page.getByRole("button", { name: "Close" }).click();
   await expect(page.getByTestId("inline-editor")).toHaveCount(0);
-  await expect(page.getByTestId("explorer-sidebar")).toBeVisible();
+  await expect(page.getByTestId("sidebar-panel")).toBeVisible();
   await expect(getExplorerNode(page, `${fixtureRoot}/src/main.ts`)).toBeVisible();
   await captureEvidence(page, "task24-editor-close-keeps-explorer");
 });
