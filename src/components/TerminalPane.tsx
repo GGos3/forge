@@ -27,6 +27,7 @@ export default function TerminalPane(props: TerminalPaneProps) {
   const [sessionId, setSessionId] = createSignal<SessionId | null>(null);
   const [loading, setLoading] = createSignal(true);
   const [error, setError] = createSignal<string | null>(null);
+  const [debugCloseCount, setDebugCloseCount] = createSignal(0);
 
   onMount(() => {
     let disposed = false;
@@ -115,6 +116,7 @@ export default function TerminalPane(props: TerminalPaneProps) {
         }}
         onClick={(e) => {
           e.stopPropagation();
+          setDebugCloseCount((count) => count + 1);
           void paneStore.closePaneById(props.paneId);
         }}
       >
@@ -128,6 +130,9 @@ export default function TerminalPane(props: TerminalPaneProps) {
           <Show when={sessionId()}>{(activeSessionId) => <Terminal sessionId={activeSessionId()} focused={props.focused} />}</Show>
         </Show>
       </Show>
+      <div class="forge-terminal-pane__debug-close" data-testid={`close-pane-debug-${props.paneId}`}>
+        paneCloseClicks: {debugCloseCount()}
+      </div>
     </div>
   );
 }

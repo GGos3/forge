@@ -13,6 +13,7 @@ import {
   matchesNewTabShortcut,
   matchesNextTabShortcut,
   matchesPrevTabShortcut,
+  shouldHandleGlobalShortcuts,
 } from "../utils/platform";
 
 export default function TabBar() {
@@ -25,6 +26,10 @@ export default function TabBar() {
 
   onMount(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (!shouldHandleGlobalShortcuts()) {
+        return;
+      }
+
       if (matchesNewTabShortcut(e, platform)) {
         e.preventDefault();
         setShowNewTabDialog(true);

@@ -27,6 +27,8 @@ function getSessionValue(sessionId: SessionId | string): string {
 export default function Terminal(props: TerminalProps) {
   let containerRef: HTMLDivElement | undefined;
   let terminal: XTerm | null = null;
+  let lastPointerTargetValue = "none";
+  let lastInputValue = "";
 
   const currentTerminalTheme = () => ({
     background: getComputedStyle(document.documentElement).getPropertyValue("--surface-1").trim() || "#1e1e2e",
@@ -37,10 +39,51 @@ export default function Terminal(props: TerminalProps) {
   });
   
   const [blocks, setBlocks] = createSignal<BlockUiItem[]>([]);
+  const [debugState, setDebugState] = createSignal({
+    textareaPresent: false,
+    helperTextareaPresent: false,
+    activeTag: "none",
+    activeClass: "",
+    lastPointerTarget: "none",
+    lastInput: "",
+  });
+
+  const syncDebugState = (nextPointerTarget?: string, nextInput?: string) => {
+    if (nextPointerTarget !== undefined) {
+      lastPointerTargetValue = nextPointerTarget;
+    }
+    if (nextInput !== undefined) {
+      lastInputValue = nextInput;
+    }
+
+    const activeElement = document.activeElement as HTMLElement | null;
+    setDebugState({
+      textareaPresent: Boolean(containerRef?.querySelector("textarea")),
+      helperTextareaPresent: Boolean(containerRef?.querySelector(".xterm-helper-textarea")),
+      activeTag: activeElement?.tagName ?? "none",
+      activeClass: activeElement?.className ?? "",
+      lastPointerTarget: lastPointerTargetValue,
+      lastInput: lastInputValue,
+    });
+  };
 
   const focusNativeTerminalInput = () => {
     const textarea = containerRef?.querySelector("textarea") as HTMLTextAreaElement | null | undefined;
     textarea?.focus({ preventScroll: true });
+    syncDebugState();
+  };
+
+  const sendInputToSession = (sessionValue: string, data: string) => {
+    if (!data) {
+      return;
+    }
+
+    syncDebugState(undefined, JSON.stringify(data));
+
+    void invoke("write_to_session", {
+      session_id: sessionValue,
+      data: Array.from(textEncoder.encode(data)),
+    });
   };
 
   onMount(() => {
@@ -146,27 +189,54 @@ export default function Terminal(props: TerminalProps) {
     const focusTerminal = () => {
       focusNativeTerminalInput();
       xterm.focus();
+      queueMicrotask(() => syncDebugState());
     };
 
     if (props.focused) {
       focusTerminal();
     }
 
-    const handlePointerDown = () => {
+    const handlePointerDown = (event: PointerEvent) => {
+      syncDebugState((event.target as HTMLElement | null)?.className ?? "unknown");
       focusTerminal();
     };
 
+    const handlePaste = (event: ClipboardEvent) => {
+      if (platform !== "macos") {
+        return;
+      }
+
+      const activeElement = document.activeElement as HTMLElement | null;
+      if (!containerRef?.contains(activeElement) && activeElement !== containerRef?.querySelector("textarea")) {
+        return;
+      }
+
+      const pastedText = event.clipboardData?.getData("text/plain") ?? "";
+      if (!pastedText) {
+        return;
+      }
+
+      event.preventDefault();
+      sendInputToSession(sessionValue, pastedText);
+    };
+
     containerRef.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("paste", handlePaste);
 
     const inputDisposable = xterm.onData((data) => {
       if (exited) {
         return;
       }
 
-      void invoke("write_to_session", {
-        session_id: sessionValue,
-        data: Array.from(textEncoder.encode(data)),
-      });
+      sendInputToSession(sessionValue, data);
+    });
+
+    xterm.onKey(({ domEvent }) => {
+      if (platform !== "macos") {
+        return;
+      }
+
+      syncDebugState(undefined, `key:${domEvent.key}`);
     });
 
     xterm.onRender(() => updateBlocksUI());
@@ -236,6 +306,7 @@ export default function Terminal(props: TerminalProps) {
     }
 
     queueMicrotask(() => {
+      syncDebugState();
       void syncSize();
     });
 
@@ -243,6 +314,7 @@ export default function Terminal(props: TerminalProps) {
       disposed = true;
       exited = true;
       containerRef?.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("paste", handlePaste);
       resizeObserver?.disconnect();
       outputUnlisten?.();
       exitUnlisten?.();
@@ -256,6 +328,7 @@ export default function Terminal(props: TerminalProps) {
     if (props.focused) {
       focusNativeTerminalInput();
       terminal?.focus();
+      queueMicrotask(() => syncDebugState());
     }
   });
 
@@ -284,10 +357,19 @@ export default function Terminal(props: TerminalProps) {
       onPointerDown={() => {
         focusNativeTerminalInput();
         terminal?.focus();
+        queueMicrotask(() => syncDebugState("terminal-focus-host"));
       }}
     >
       <div ref={containerRef} class="forge-terminal-surface" data-testid="terminal-surface" style={{ "-webkit-app-region": "no-drag" }} />
       <BlockOverlay blocks={blocks()} />
+      <div class="forge-terminal-debug" data-testid="terminal-debug-state">
+        <div>textarea: {debugState().textareaPresent ? "yes" : "no"}</div>
+        <div>helper: {debugState().helperTextareaPresent ? "yes" : "no"}</div>
+        <div>activeTag: {debugState().activeTag}</div>
+        <div>activeClass: {debugState().activeClass || "(empty)"}</div>
+        <div>lastPointer: {debugState().lastPointerTarget || "(none)"}</div>
+        <div>lastInput: {debugState().lastInput || "(none)"}</div>
+      </div>
     </div>
   );
 }

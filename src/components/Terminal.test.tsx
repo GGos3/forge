@@ -19,6 +19,7 @@ interface MockTerminal {
   onData: ReturnType<typeof vi.fn>;
   onRender: ReturnType<typeof vi.fn>;
   onScroll: ReturnType<typeof vi.fn>;
+  onKey: ReturnType<typeof vi.fn>;
   registerMarker: ReturnType<typeof vi.fn>;
   buffer: any;
   element: any;
@@ -86,6 +87,7 @@ vi.mock("@xterm/xterm", () => ({
     });
     onRender = vi.fn();
     onScroll = vi.fn();
+    onKey = vi.fn();
     registerMarker = vi.fn();
     buffer = { active: { baseY: 0, viewportY: 0, cursorY: 0 } };
     element = { clientHeight: 100 };
