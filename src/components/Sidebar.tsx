@@ -83,10 +83,15 @@ const Sidebar: Component = () => {
           <Switch>
             <Match when={sidebarStore.activeSection === "explorer"}>
               <div class="forge-sidebar-panel__header">
-                <span class="forge-sidebar-panel__title">EXPLORER</span>
+                <span class="forge-sidebar-panel__title">
+                  EXPLORER
+                  <Show when={explorerStore.root}>
+                    {" "}({explorerStore.root?.provider === "remote" ? "REMOTE" : "LOCAL"})
+                  </Show>
+                </span>
                 <Show when={explorerStore.root}>
-                  <span class="forge-sidebar-panel__subtitle" title={rootContext()}>
-                    {explorerStore.root?.provider === "remote" ? "REMOTE" : "LOCAL"}
+                  <span class="forge-sidebar-panel__subtitle" title={rootContext()} data-testid="explorer-root-path-placeholder">
+                    {rootContext()}
                   </span>
                 </Show>
                 <div class="forge-sidebar-panel__actions">

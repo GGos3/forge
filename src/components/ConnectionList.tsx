@@ -2,6 +2,7 @@ import { createSignal, For, Show, onMount, createMemo } from "solid-js";
 import { connectionStore } from "../stores/connection";
 import { recentConnectionsStore } from "../stores/recentConnections";
 import { explorerStore } from "../stores/explorer";
+import { sidebarStore } from "../stores/sidebar";
 import { parseQuickConnect } from "../utils/quickConnect";
 import { buildGroupTree } from "../utils/groupTree";
 import type { GroupNode } from "../types/connection";
@@ -77,6 +78,7 @@ export default function ConnectionList() {
     const connection = connectionStore.activeConnections.find((c) => c.profile.id === id);
     if (connection?.status === "connected" && connection.connectionId) {
       await explorerStore.setRoot("/", "remote", connection.connectionId);
+      sidebarStore.setSection("explorer");
     }
   };
 
@@ -115,6 +117,7 @@ export default function ConnectionList() {
     const connection = connectionStore.activeConnections.find((c) => c.profile.id === id);
     if (connection?.status === "connected" && connection.connectionId) {
       await explorerStore.setRoot("/", "remote", connection.connectionId);
+      sidebarStore.setSection("explorer");
     }
   };
 

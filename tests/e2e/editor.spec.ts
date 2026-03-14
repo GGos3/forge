@@ -62,7 +62,7 @@ test("editor close keeps the explorer workspace visible", async ({ page }) => {
   await selectFile(page, `${fixtureRoot}/src/main.ts`);
   await expect(page.getByTestId("inline-editor")).toBeVisible();
 
-  await page.getByRole("button", { name: "Close" }).click();
+  await page.getByTestId("inline-editor").getByRole("button", { name: "Close" }).click();
   await expect(page.getByTestId("inline-editor")).toHaveCount(0);
   await expect(page.getByTestId("sidebar-panel")).toBeVisible();
   await expect(getExplorerNode(page, `${fixtureRoot}/src/main.ts`)).toBeVisible();
@@ -128,7 +128,7 @@ test("editor saves local files, updates status, and reopens persisted mock conte
   await expect(page.locator(".forge-editor-dirty-dot")).toHaveCount(0);
   await expect(page.locator(".forge-editor-status")).toContainText("Saved");
 
-  await page.getByRole("button", { name: "Close" }).click();
+  await page.getByTestId("inline-editor").getByRole("button", { name: "Close" }).click();
   await expect(page.getByTestId("inline-editor")).toHaveCount(0);
 
   await selectFile(page, `${fixtureRoot}/src/utils/helper.ts`);
@@ -153,7 +153,7 @@ test("editor handles read-only, binary, oversized, unsupported-encoding, and bro
   await expect(page.locator(".forge-editor-read-only-badge")).toBeVisible();
   await expect(page.getByRole("button", { name: "Save" })).toBeDisabled();
 
-  await page.getByRole("button", { name: "Close" }).click();
+  await page.getByTestId("inline-editor").getByRole("button", { name: "Close" }).click();
   await expect(page.getByTestId("inline-editor")).toHaveCount(0);
 
   await selectFile(page, `${fixtureRoot}/binary.png`);
