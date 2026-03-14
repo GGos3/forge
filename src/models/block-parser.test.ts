@@ -33,6 +33,27 @@ describe("BlockParser", () => {
     expect(block.exitCode).toBe(0);
   });
 
+  it("parses inline command text from the B marker", () => {
+    const parser = new BlockParser();
+
+    parser.feed(`${osc("A")}${osc("B;echo inline")}${osc("C")}inline\n${osc("D;0")}`);
+
+    const [block] = parser.getBlocks();
+    expect(block.command).toBe("echo inline");
+    expect(block.output).toBe("inline\n");
+    expect(block.exitCode).toBe(0);
+  });
+
+  it("preserves semicolons in inline B marker commands", () => {
+    const parser = new BlockParser();
+
+    parser.feed(`${osc("A")}${osc("B;echo one; echo two")}${osc("C")}done\n${osc("D;0")}`);
+
+    const [block] = parser.getBlocks();
+    expect(block.command).toBe("echo one; echo two");
+    expect(block.output).toBe("done\n");
+  });
+
   it("captures non-zero exit codes", () => {
     const parser = new BlockParser();
 

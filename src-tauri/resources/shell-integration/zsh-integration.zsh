@@ -6,7 +6,7 @@ __forge_osc133_emit() {
 
 __forge_osc133_preexec() {
   __forge_osc133_command_started=1
-  __forge_osc133_emit "B"
+  __forge_osc133_emit "B;$1"
   __forge_osc133_emit "C"
 }
 

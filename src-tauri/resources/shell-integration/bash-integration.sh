@@ -5,11 +5,13 @@ __forge_osc133_emit() {
 }
 
 __forge_osc133_preexec() {
+  local command="${BASH_COMMAND-}"
+
   if [[ -n "${COMP_LINE-}" ]]; then
     return
   fi
 
-  case "${BASH_COMMAND-}" in
+  case "${command}" in
     __forge_osc133_*|history*|builtin\\ history*)
       return
       ;;
@@ -17,7 +19,7 @@ __forge_osc133_preexec() {
 
   if [[ -z "${__forge_osc133_command_started-}" ]]; then
     __forge_osc133_command_started=1
-    __forge_osc133_emit "B"
+    __forge_osc133_emit "B;${command}"
     __forge_osc133_emit "C"
   fi
 }
