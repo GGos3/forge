@@ -139,6 +139,14 @@ pub struct SshConnectionLifecycleEvent {
     pub reason: Option<String>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateMetadata {
+    pub version: String,
+    pub current_version: String,
+    pub notes: Option<String>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -1,4 +1,6 @@
 use std::sync::Mutex;
+use tauri_plugin_updater::UpdaterExt;
+use url::Url;
 
 use tauri::{AppHandle, Emitter, State};
 
@@ -7,7 +9,7 @@ use crate::session::SessionManager;
 use crate::shell::ShellInfo;
 use crate::types::{
     ExplorerEntry, ReadFileResponse, ResizePayload, SessionConfig, SessionExitEvent, SessionId,
-    SessionOutputEvent, ShellType, WriteFileRequest,
+    SessionOutputEvent, ShellType, UpdateMetadata, WriteFileRequest,
 };
 
 const MAX_EDITOR_FILE_SIZE_BYTES: u64 = 5 * 1024 * 1024;
@@ -177,6 +179,61 @@ fn format_file_too_large_message(size_bytes: u64) -> String {
 pub fn write_file(request: WriteFileRequest) -> Result<(), String> {
     let provider = LocalFileSystem::new(request.root.into()).map_err(|e| e.to_string())?;
     write_file_with_provider(&provider, &request.path, request.content.as_bytes())
+}
+
+#[tauri::command]
+pub async fn check_for_updates(app: AppHandle, channel: String) -> Result<Option<UpdateMetadata>, String> {
+    let endpoint = if channel == "dev" {
+        "https://github.com/GGos3/forge/releases/download/latest-dev/latest.json"
+    } else {
+        "https://github.com/GGos3/forge/releases/download/latest/latest.json"
+    };
+
+    let update = app
+        .updater_builder()
+        .endpoints(vec![Url::parse(endpoint).map_err(|e| e.to_string())?])
+        .map_err(|e| e.to_string())?
+        .build()
+        .map_err(|e| e.to_string())?
+        .check()
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(update.map(|u| UpdateMetadata {
+        version: u.version,
+        current_version: u.current_version,
+        notes: u.body,
+    }))
+}
+
+#[tauri::command]
+pub async fn install_update(app: AppHandle, channel: String) -> Result<(), String> {
+    let endpoint = if channel == "dev" {
+        "https://github.com/GGos3/forge/releases/download/latest-dev/latest.json"
+    } else {
+        "https://github.com/GGos3/forge/releases/download/latest/latest.json"
+    };
+
+    let update = app
+        .updater_builder()
+        .endpoints(vec![Url::parse(endpoint).map_err(|e| e.to_string())?])
+        .map_err(|e| e.to_string())?
+        .build()
+        .map_err(|e| e.to_string())?
+        .check()
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let Some(update) = update else {
+        return Err("No pending update available.".to_string());
+    };
+
+    update
+        .download_and_install(|_, _| {}, || {})
+        .await
+        .map_err(|e| e.to_string())?;
+
+    app.restart();
 }
 
 fn write_file_with_provider(

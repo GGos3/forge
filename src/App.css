@@ -6,3 +6,33 @@
 @import './styles/editor.css';
 @import './styles/explorer.css';
 @import './styles/connection.css';
+
+.forge-updater-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  background: rgba(124, 91, 245, 0.12);
+  border-bottom: 1px solid rgba(124, 91, 245, 0.25);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.forge-updater-banner__content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+.forge-updater-banner__button {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 12px;
+}

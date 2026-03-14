@@ -5,6 +5,7 @@ import ExplorerSidebar from "./components/ExplorerSidebar";
 import PaneDivider from "./components/PaneDivider";
 import HostKeyVerificationDialog from "./components/HostKeyVerificationDialog";
 import InlineEditor from "./components/InlineEditor";
+import UpdaterBanner from "./components/UpdaterBanner";
 import { tabStore } from "./stores/tab";
 import { paneStore } from "./stores/pane";
 import { explorerStore } from "./stores/explorer";
@@ -96,6 +97,7 @@ function App() {
 
   return (
     <main class="forge-app">
+      <UpdaterBanner />
       <TabBar />
       <div class="forge-main-content" style={{ display: "flex", flex: 1, height: "100%", width: "100%", overflow: "hidden" }}>
         <Show when={explorerStore.isVisible}>

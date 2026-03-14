@@ -20,6 +20,7 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_process::init())
         .setup(|app| {
             credentials::ensure_default_storage_dir()?;
 
@@ -32,6 +33,7 @@ pub fn run() {
             )?;
 
             app.manage(ssh::SshState::new(app.handle().clone()));
+            app.handle().plugin(tauri_plugin_updater::Builder::new().build())?;
 
             Ok(())
         })
@@ -49,6 +51,8 @@ pub fn run() {
             commands::list_directory,
             commands::read_file,
             commands::write_file,
+            commands::check_for_updates,
+            commands::install_update,
             ssh::connect_ssh,
             ssh::disconnect_ssh,
             ssh::open_remote_sftp,
