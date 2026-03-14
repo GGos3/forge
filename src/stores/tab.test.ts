@@ -102,8 +102,8 @@ describe("tab store", () => {
 
     await tabStore.closeTab(id1);
 
-    expect(invoke).toHaveBeenCalledWith("close_session", { session_id: "session-a" });
-    expect(invoke).toHaveBeenCalledWith("close_session", { session_id: "session-b" });
+    expect(invoke).toHaveBeenCalledWith("close_session", { sessionId: "session-a" });
+    expect(invoke).toHaveBeenCalledWith("close_session", { sessionId: "session-b" });
     expect(tabStore.tabs.find((t) => t.id === id1)).toBeUndefined();
     expect(tabStore.activeTabId).toBe(id2);
   });

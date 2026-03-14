@@ -63,7 +63,7 @@ describe("pane store", () => {
     const tab = activeTabOrThrow();
 
     expect(tab.root.type).toBe("terminal");
-    expect(invoke).toHaveBeenCalledWith("close_session", { session_id: "session-new" });
+    expect(invoke).toHaveBeenCalledWith("close_session", { sessionId: "session-new" });
   });
 
   it("closePaneById closes the clicked pane directly", async () => {
@@ -84,7 +84,7 @@ describe("pane store", () => {
     const tab = activeTabOrThrow();
 
     expect(tab.root.type).toBe("terminal");
-    expect(invoke).toHaveBeenCalledWith("close_session", { session_id: "session-clicked" });
+    expect(invoke).toHaveBeenCalledWith("close_session", { sessionId: "session-clicked" });
   });
 
   it("focusPane changes active pane when pane exists", async () => {

@@ -158,7 +158,7 @@ describe("Terminal", () => {
 
     terminal.dataHandler?.("pwd\r");
     expect(invoke).toHaveBeenCalledWith("write_to_session", {
-      session_id: "session-1",
+      sessionId: "session-1",
       data: Array.from(new TextEncoder().encode("pwd\r")),
     });
 

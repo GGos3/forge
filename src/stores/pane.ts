@@ -88,7 +88,7 @@ export const paneStore = {
     const removedSessions = getRemovedTerminalSessionIds(activeTab.root, nextTree);
 
     for (const sessionId of removedSessions.filter((id) => !isPendingSessionId(id))) {
-      await invoke("close_session", { session_id: sessionId.value });
+      await invoke("close_session", { sessionId: sessionId.value });
       sessionStore.removeSession(sessionId);
     }
 
@@ -116,7 +116,7 @@ export const paneStore = {
     const removedSessions = getRemovedTerminalSessionIds(activeTab.root, nextTree);
 
     for (const sessionId of removedSessions.filter((session) => !isPendingSessionId(session))) {
-      await invoke("close_session", { session_id: sessionId.value });
+      await invoke("close_session", { sessionId: sessionId.value });
       sessionStore.removeSession(sessionId);
     }
 

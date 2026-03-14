@@ -94,7 +94,7 @@ export default function Terminal(props: TerminalProps) {
 
     try {
       await invoke("write_to_session", {
-        session_id: sessionValue,
+        sessionId: sessionValue,
         data: Array.from(textEncoder.encode(data)),
       });
       syncDebugState(undefined, undefined, "ok");

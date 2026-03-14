@@ -102,7 +102,7 @@ export const tabStore = {
     )];
 
     for (const sessionId of sessionIds) {
-      await invoke("close_session", { session_id: sessionId.value });
+      await invoke("close_session", { sessionId: sessionId.value });
       sessionStore.removeSession(sessionId);
     }
 

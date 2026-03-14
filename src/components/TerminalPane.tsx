@@ -71,7 +71,7 @@ export default function TerminalPane(props: TerminalPaneProps) {
         );
 
         if (disposed) {
-          await invoke("close_session", { session_id: createdSessionId.value });
+          await invoke("close_session", { sessionId: createdSessionId.value });
           return;
         }
 
