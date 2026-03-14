@@ -28,6 +28,74 @@ pnpm test:run      # Run Vitest once
 pnpm test:e2e      # Run Playwright E2E suite
 ```
 
+## Release channels
+
+- **Development channel**: automatic GitHub prereleases from `main`
+- **Production channel**: GitHub releases from `v*` tags
+
+Both channels publish desktop artifacts through GitHub Actions.
+
+## One-line install commands
+
+These commands assume you have authenticated `gh` CLI access to this repository.
+
+### Linux
+
+Development build:
+
+```bash
+gh repo clone GGos3/forge /tmp/forge-install -- --depth 1 && bash /tmp/forge-install/scripts/install.sh --channel dev && rm -rf /tmp/forge-install
+```
+
+Production build:
+
+```bash
+gh repo clone GGos3/forge /tmp/forge-install -- --depth 1 && bash /tmp/forge-install/scripts/install.sh --channel prod && rm -rf /tmp/forge-install
+```
+
+This installs an AppImage to:
+
+```text
+~/.local/bin/forge-dev
+~/.local/bin/forge
+```
+
+### macOS
+
+Development build:
+
+```bash
+gh repo clone GGos3/forge /tmp/forge-install -- --depth 1 && bash /tmp/forge-install/scripts/install.sh --channel dev && rm -rf /tmp/forge-install
+```
+
+Production build:
+
+```bash
+gh repo clone GGos3/forge /tmp/forge-install -- --depth 1 && bash /tmp/forge-install/scripts/install.sh --channel prod && rm -rf /tmp/forge-install
+```
+
+This installs the app into:
+
+```text
+~/Applications/
+```
+
+### Windows
+
+Development build:
+
+```powershell
+gh repo clone GGos3/forge $env:TEMP\forge-install -- --depth 1; & "$env:TEMP\forge-install\scripts\install.ps1" -Channel dev; Remove-Item $env:TEMP\forge-install -Recurse -Force
+```
+
+Production build:
+
+```powershell
+gh repo clone GGos3/forge $env:TEMP\forge-install -- --depth 1; & "$env:TEMP\forge-install\scripts\install.ps1" -Channel prod; Remove-Item $env:TEMP\forge-install -Recurse -Force
+```
+
+This downloads the latest Windows installer from GitHub Releases and runs it.
+
 ## How to run it locally
 
 ### 1. Install dependencies
@@ -97,6 +165,19 @@ src-tauri/target/release/bundle/
 ```
 
 Typical outputs include installers or app bundles depending on your OS.
+
+## GitHub release automation
+
+- `.github/workflows/ci.yml` runs verification on pushes and pull requests
+- `.github/workflows/release-dev.yml` publishes prerelease desktop artifacts from `main`
+- `.github/workflows/release-prod.yml` publishes production desktop artifacts from `v*` tags
+
+To cut a production release:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
 
 ## Linux system dependencies
 
