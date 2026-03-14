@@ -66,6 +66,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Configure updater channel
+        shell: bash
+        run: echo "VITE_FORGE_RELEASE_CHANNEL=dev" >> "$GITHUB_ENV"
+
       - name: Run verification
         run: |
           if [ "${{ matrix.platform }}" != "windows-latest" ]; then pnpm test:run; fi
@@ -76,6 +80,8 @@ jobs:
         uses: tauri-apps/tauri-action@v0.6.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           tagName: dev-${{ github.run_number }}
           releaseName: Forge Dev ${{ github.run_number }}
@@ -87,3 +93,30 @@ jobs:
           includeDebug: false
           includeRelease: true
           args: ${{ matrix.args }}
+
+      - name: Generate updater metadata aliases
+        if: always()
+        shell: bash
+        run: |
+          shopt -s globstar nullglob
+          LATEST_JSON=""
+          for candidate in src-tauri/target/release/bundle/**/latest.json; do
+            LATEST_JSON="$candidate"
+            break
+          done
+          if [ -z "$LATEST_JSON" ]; then
+            echo "No latest.json generated; skipping updater alias generation"
+            exit 0
+          fi
+          node scripts/generate-updater-json.mjs "$LATEST_JSON" .updater/latest.json "Development release" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+      - name: Upload dev updater alias
+        if: always()
+        shell: bash
+        run: |
+          if [ -f .updater/latest.json ]; then
+            if ! gh release view latest-dev >/dev/null 2>&1; then
+              gh release create latest-dev --prerelease --title "Forge Dev Latest" --notes "Stable alias for latest development updater metadata"
+            fi
+            gh release upload latest-dev .updater/latest.json --clobber
+          fi
