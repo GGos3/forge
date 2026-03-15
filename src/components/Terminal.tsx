@@ -292,6 +292,7 @@ export default function Terminal(props: TerminalProps) {
 
       const rawBytes = new Uint8Array(event.payload.data);
       const str = textDecoder.decode(rawBytes);
+      const preWriteRow = cursorRow();
       const prevBlockIds = new Set(blockParser.getBlocks().map(b => b.id));
       const prevCurrentId = blockParser.getCurrentBlock()?.id;
       if (prevCurrentId) prevBlockIds.add(prevCurrentId);
@@ -300,36 +301,24 @@ export default function Terminal(props: TerminalProps) {
 
       const snapshotBlocks = blockParser.getBlocks();
       const snapshotCurrent = blockParser.getCurrentBlock();
-      const snapshotAllIds = snapshotBlocks.map(b => b.id);
-      if (snapshotCurrent) snapshotAllIds.push(snapshotCurrent.id);
+      const snapshotAll = [...snapshotBlocks, ...(snapshotCurrent ? [snapshotCurrent] : [])];
 
       xterm.write(new Uint8Array(event.payload.data), () => {
         const postWriteRow = cursorRow();
 
-        for (const id of snapshotAllIds) {
-          if (!prevBlockIds.has(id) && !blockStartRows.has(id)) {
-            blockStartRows.set(id, postWriteRow);
-            console.log(`[BLOCK-DEBUG] NEW blockStartRow: id=${id.slice(-8)}, postWriteRow=${postWriteRow}, prevIds=[${[...prevBlockIds].map(x => x.slice(-8))}], snapshotIds=[${snapshotAllIds.map(x => x.slice(-8))}]`);
+        for (const b of snapshotAll) {
+          if (!prevBlockIds.has(b.id) && !blockStartRows.has(b.id)) {
+            blockStartRows.set(b.id, b.source === "fallback" ? preWriteRow : postWriteRow);
           }
         }
 
-        const allForOutput = [...snapshotBlocks, ...(snapshotCurrent ? [snapshotCurrent] : [])];
-        for (const b of allForOutput) {
+        for (const b of snapshotAll) {
           if (!blockOutputStartRows.has(b.id) && b.outputStartLine > b.startLine) {
             const bStart = blockStartRows.get(b.id) ?? 0;
             const outputOffset = b.outputStartLine - b.startLine;
             blockOutputStartRows.set(b.id, bStart + outputOffset);
-            console.log(`[BLOCK-DEBUG] OUTPUT-START: id=${b.id.slice(-8)}, bStart=${bStart}, outputOffset=${outputOffset}, result=${bStart + outputOffset}`);
           }
         }
-
-        // Debug: dump all blockStartRows
-        const entries: string[] = [];
-        for (const [id, row] of blockStartRows.entries()) {
-          const block = allForOutput.find(b => b.id === id);
-          entries.push(`${id.slice(-8)}(cmd="${block?.command?.slice(0,10) ?? "?"}"):row=${row}`);
-        }
-        console.log(`[BLOCK-DEBUG] ALL-ROWS: ${entries.join(', ')}`);
 
         updateBlocksUI();
       });

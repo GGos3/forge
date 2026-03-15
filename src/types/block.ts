@@ -1,5 +1,7 @@
 export type BlockId = string;
 
+export type BlockSource = "osc" | "fallback";
+
 export interface Block {
   id: BlockId;
   command: string;
@@ -9,4 +11,5 @@ export interface Block {
   outputStartLine: number;
   exitCode: number | null;
   timestamp: number;
+  source: BlockSource;
 }

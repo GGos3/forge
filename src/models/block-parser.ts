@@ -231,6 +231,7 @@ export class BlockParser {
         outputStartLine: lineNumber + 1,
         exitCode: null,
         timestamp: Date.now(),
+        source: "fallback",
       };
       this.state = "output";
       return;
@@ -258,6 +259,7 @@ export class BlockParser {
       outputStartLine: line,
       exitCode: null,
       timestamp: Date.now(),
+      source: "osc",
     };
   }
 

@@ -76,9 +76,6 @@ export default function BlockOverlay(props: BlockOverlayProps) {
       const relativeY = mouseY - rect.top;
       const hit = hitTestBlocks(relativeY, props.blocks);
       if (hit) {
-        if (hit.block.id !== hoveredBlockId()) {
-          console.log(`[HOVER-DEBUG] relY=${relativeY.toFixed(0)}, hit="${hit.block.command?.slice(0,15)}" top=${hit.block.top.toFixed(0)} h=${hit.block.height.toFixed(0)} inputH=${hit.block.inputHeight.toFixed(0)}, blocks=[${props.blocks.map(b => `"${b.command?.slice(0,8)}"@${b.top.toFixed(0)}`).join(', ')}]`);
-        }
         updateHover(hit.block.id, hit.region, hit.block);
       } else {
         updateHover(null, null, null);
