@@ -9,7 +9,8 @@ import type { SessionExitEvent, SessionId, SessionOutputEvent } from "../types/s
 import { BlockParser } from "../models/block-parser";
 import BlockOverlay, { BlockUiItem } from "./BlockOverlay";
 import { settingsStore } from "../stores/settings";
-import { getCurrentPlatform } from "../utils/platform";
+import { showToast } from "./ui/Toast";
+import { getCurrentPlatform, matchesToggleSidebarShortcut } from "../utils/platform";
 
 interface TerminalProps {
   sessionId: SessionId;
@@ -223,6 +224,11 @@ export default function Terminal(props: TerminalProps) {
 
     xterm.attachCustomKeyEventHandler((event: KeyboardEvent) => {
       if (event.type !== "keydown") return true;
+
+      if (matchesToggleSidebarShortcut(event, platform)) {
+        return false;
+      }
+
       if (event.key !== "c" || !(event.metaKey || event.ctrlKey)) return true;
       if (xterm.hasSelection()) return true;
 
@@ -234,7 +240,8 @@ export default function Terminal(props: TerminalProps) {
         : hovered.block.output;
 
       if (textToCopy) {
-        void navigator.clipboard.writeText(textToCopy);
+        navigator.clipboard.writeText(textToCopy).catch(() => {});
+        showToast("Copied to clipboard");
         return false;
       }
 

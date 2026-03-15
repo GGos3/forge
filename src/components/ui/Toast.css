@@ -1,0 +1,25 @@
+.forge-toast {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  background-color: var(--surface-3);
+  color: var(--text-primary);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  font-size: var(--text-sm);
+  animation: forge-toast-enter 0.2s ease-out;
+}
+
+@keyframes forge-toast-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

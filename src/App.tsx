@@ -6,6 +6,7 @@ import Sidebar from "./components/Sidebar";
 import HostKeyVerificationDialog from "./components/HostKeyVerificationDialog";
 import InlineEditor from "./components/InlineEditor";
 import UpdaterBanner from "./components/UpdaterBanner";
+import Toast from "./components/ui/Toast";
 import ShortcutOverlay, { setIsShortcutOverlayOpen, isShortcutOverlayOpen } from "./components/ShortcutOverlay";
 import { tabStore } from "./stores/tab";
 import { paneStore } from "./stores/pane";
@@ -45,6 +46,12 @@ function App() {
       if (isShortcutToggle) {
         e.preventDefault();
         setIsShortcutOverlayOpen(!isShortcutOverlayOpen());
+        return;
+      }
+
+      if (e.key === "Escape" && sidebarStore.isPanelOpen) {
+        e.preventDefault();
+        sidebarStore.closePanel();
         return;
       }
 
@@ -146,6 +153,7 @@ function App() {
         <HostKeyVerificationDialog onClose={handleHostKeyVerificationClose} />
       </Show>
       <ShortcutOverlay />
+      <Toast />
     </main>
   );
 }

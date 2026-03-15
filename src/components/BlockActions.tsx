@@ -1,4 +1,5 @@
 import { createSignal, Show } from "solid-js";
+import { showToast } from "./ui/Toast";
 
 interface BlockActionsProps {
   command: string;
@@ -16,14 +17,17 @@ const CheckIcon = () => (
 export default function BlockActions(props: BlockActionsProps) {
   const [copied, setCopied] = createSignal<string | null>(null);
 
-  const handleCopy = async (type: "command" | "output" | "both", text: string) => {
+  const handleCopy = (e: MouseEvent, type: "command" | "output" | "both", text: string) => {
+    e.preventDefault();
+    e.stopPropagation();
     try {
       if (props.onCopy) {
         props.onCopy(text);
       } else {
-        await navigator.clipboard.writeText(text);
+        navigator.clipboard.writeText(text).catch(() => {});
       }
       setCopied(type);
+      showToast("Copied to clipboard");
       setTimeout(() => setCopied(null), 2000);
     } catch { void 0; }
   };
@@ -33,7 +37,7 @@ export default function BlockActions(props: BlockActionsProps) {
       <button
         class="forge-block-action-btn"
         classList={{ "forge-block-action-btn--copied": copied() === "command" }}
-        onClick={() => handleCopy("command", props.command)}
+        onClick={(e) => handleCopy(e, "command", props.command)}
         title="Copy Command"
       >
         <Show when={copied() === "command"} fallback={
@@ -50,7 +54,7 @@ export default function BlockActions(props: BlockActionsProps) {
       <button
         class="forge-block-action-btn"
         classList={{ "forge-block-action-btn--copied": copied() === "output" }}
-        onClick={() => handleCopy("output", props.output)}
+        onClick={(e) => handleCopy(e, "output", props.output)}
         title="Copy Output"
       >
         <Show when={copied() === "output"} fallback={
@@ -69,7 +73,7 @@ export default function BlockActions(props: BlockActionsProps) {
       <button
         class="forge-block-action-btn"
         classList={{ "forge-block-action-btn--copied": copied() === "both" }}
-        onClick={() => handleCopy("both", `$ ${props.command}\n${props.output}`)}
+        onClick={(e) => handleCopy(e, "both", `$ ${props.command}\n${props.output}`)}
         title="Copy Command + Output"
       >
         <Show when={copied() === "both"} fallback={

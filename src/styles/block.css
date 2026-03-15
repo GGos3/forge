@@ -75,10 +75,11 @@
 }
 
 .forge-block-toolbar {
-  pointer-events: auto;
+  pointer-events: none;
   position: absolute;
   top: 0;
-  right: 0;
+  left: var(--space-4);
+  right: auto;
   display: flex;
   align-items: center;
   gap: 0;
@@ -185,6 +186,7 @@
 }
 
 .forge-block-action-btn {
+  pointer-events: auto;
   display: flex;
   align-items: center;
   justify-content: center;
