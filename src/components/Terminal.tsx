@@ -297,21 +297,22 @@ export default function Terminal(props: TerminalProps) {
 
       blockParser.feed(str);
 
+      const snapshotBlocks = blockParser.getBlocks();
+      const snapshotCurrent = blockParser.getCurrentBlock();
+      const snapshotAllIds = snapshotBlocks.map(b => b.id);
+      if (snapshotCurrent) snapshotAllIds.push(snapshotCurrent.id);
+
       xterm.write(new Uint8Array(event.payload.data), () => {
         const postWriteRow = cursorRow();
 
-        const allBlocks = blockParser.getBlocks();
-        const currentBlock = blockParser.getCurrentBlock();
-        const allBlockIds = allBlocks.map(b => b.id);
-        if (currentBlock) allBlockIds.push(currentBlock.id);
-
-        for (const id of allBlockIds) {
+        for (const id of snapshotAllIds) {
           if (!prevBlockIds.has(id) && !blockStartRows.has(id)) {
             blockStartRows.set(id, postWriteRow);
           }
         }
 
-        for (const b of [...allBlocks, ...(currentBlock ? [currentBlock] : [])]) {
+        const allForOutput = [...snapshotBlocks, ...(snapshotCurrent ? [snapshotCurrent] : [])];
+        for (const b of allForOutput) {
           if (!blockOutputStartRows.has(b.id) && b.outputStartLine > b.startLine) {
             const bStart = blockStartRows.get(b.id) ?? 0;
             const outputOffset = b.outputStartLine - b.startLine;
