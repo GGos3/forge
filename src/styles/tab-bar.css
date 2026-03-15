@@ -1,7 +1,7 @@
 .forge-tab-bar {
   display: flex;
   align-items: flex-end;
-  height: 38px;
+  height: 40px;
   background-color: var(--surface-0);
   box-sizing: border-box;
   overflow-x: auto;
@@ -9,6 +9,7 @@
   padding: 0 var(--space-2);
   -webkit-app-region: drag;
   scrollbar-width: none;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .forge-tab-bar::-webkit-scrollbar {
@@ -63,10 +64,11 @@
   content: "";
   position: absolute;
   bottom: -1px;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background-color: var(--surface-1);
+  left: var(--space-3);
+  right: var(--space-3);
+  height: 2px;
+  background: var(--accent);
+  border-radius: var(--radius-full) var(--radius-full) 0 0;
 }
 
 .forge-tab--dragging {
@@ -167,15 +169,16 @@
 .forge-status-bar {
   display: flex;
   align-items: center;
-  height: 24px;
+  height: 26px;
   padding: 0 var(--space-3);
   background-color: var(--surface-0);
   border-top: 1px solid var(--border-subtle);
   font-size: var(--text-xs);
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
   gap: var(--space-3);
   flex-shrink: 0;
   user-select: none;
+  letter-spacing: 0.02em;
 }
 
 .forge-status-bar__section {

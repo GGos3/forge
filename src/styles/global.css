@@ -67,6 +67,35 @@ body {
   height: 100%;
 }
 
+.forge-terminal-surface .xterm {
+  padding: var(--space-2) 0 0 var(--space-2);
+}
+
+.forge-terminal-surface .xterm-viewport::-webkit-scrollbar {
+  width: 8px;
+}
+
+.forge-terminal-surface .xterm-viewport::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.forge-terminal-surface .xterm-viewport::-webkit-scrollbar-thumb {
+  background: var(--surface-5);
+  border-radius: var(--radius-full);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.forge-terminal-surface .xterm-viewport::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.forge-terminal-surface .xterm-cursor-layer {
+  filter: drop-shadow(0 0 3px var(--accent));
+}
+
 .forge-dialog-overlay {
   position: fixed;
   top: 0;
