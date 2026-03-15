@@ -23,6 +23,15 @@ function getSessionValue(sessionId: SessionId | string): string {
   return typeof sessionId === "string" ? sessionId : sessionId.value;
 }
 
+function getCellHeight(terminal: XTerm): number {
+  const measureEl = terminal.element?.querySelector('.xterm-char-measure-element');
+  if (measureEl) {
+    const rect = measureEl.getBoundingClientRect();
+    if (rect.height > 0) return rect.height;
+  }
+  return (terminal.element?.clientHeight || 0) / terminal.rows;
+}
+
 export default function Terminal(props: TerminalProps) {
   let containerRef: HTMLDivElement | undefined;
   let terminal: XTerm | null = null;
@@ -131,7 +140,7 @@ export default function Terminal(props: TerminalProps) {
       const blocksToRender = currentBlock ? [...allBlocks, currentBlock] : allBlocks;
       
       const viewportY = terminal.buffer.active.viewportY;
-      const cellHeight = (terminal.element?.clientHeight || 0) / terminal.rows;
+      const cellHeight = getCellHeight(terminal);
       if (cellHeight === 0 || Number.isNaN(cellHeight)) return;
 
       const uiItems: BlockUiItem[] = [];

@@ -24,7 +24,10 @@ interface MockTerminal {
   attachCustomKeyEventHandler: ReturnType<typeof vi.fn>;
   hasSelection: ReturnType<typeof vi.fn>;
   buffer: any;
-  element: any;
+  element: {
+    clientHeight: number;
+    querySelector: ReturnType<typeof vi.fn>;
+  };
 }
 
 interface MockBufferLine {
@@ -107,7 +110,27 @@ vi.mock("@xterm/xterm", () => ({
         getLine: vi.fn((index: number) => this.lines[index]),
       },
     };
-    element = { clientHeight: 100 };
+    element = {
+      clientHeight: 100,
+      querySelector: vi.fn((selector: string) => {
+        if (selector === '.xterm-char-measure-element') {
+          return {
+            getBoundingClientRect: () => ({
+              height: 17,
+              width: 8,
+              top: 0,
+              left: 0,
+              bottom: 17,
+              right: 8,
+              x: 0,
+              y: 0,
+              toJSON: () => ({}),
+            }),
+          };
+        }
+        return null;
+      }),
+    };
 
     constructor() {
       mockState.terminalInstances.push(this as MockTerminal);
