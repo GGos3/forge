@@ -280,7 +280,6 @@ export default function Terminal(props: TerminalProps) {
 
       const rawBytes = new Uint8Array(event.payload.data);
       const str = textDecoder.decode(rawBytes);
-      const preWriteRow = cursorRow();
       const prevBlockIds = new Set(blockParser.getBlocks().map(b => b.id));
       const prevCurrentId = blockParser.getCurrentBlock()?.id;
       if (prevCurrentId) prevBlockIds.add(prevCurrentId);
@@ -288,7 +287,7 @@ export default function Terminal(props: TerminalProps) {
       blockParser.feed(str);
 
       xterm.write(new Uint8Array(event.payload.data), () => {
-        const blockStartRow = Math.max(0, preWriteRow);
+        const postWriteRow = cursorRow();
 
         const allBlocks = blockParser.getBlocks();
         const currentBlock = blockParser.getCurrentBlock();
@@ -297,7 +296,7 @@ export default function Terminal(props: TerminalProps) {
 
         for (const id of allBlockIds) {
           if (!prevBlockIds.has(id) && !blockStartRows.has(id)) {
-            blockStartRows.set(id, blockStartRow);
+            blockStartRows.set(id, postWriteRow);
           }
         }
 
