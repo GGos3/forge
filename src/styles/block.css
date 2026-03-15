@@ -16,14 +16,14 @@
   pointer-events: none;
   border-radius: 0;
   border: none;
-  border-right: 3px solid transparent;
+  border-bottom: 1px solid var(--block-divider);
   background: none;
-  transition: border-color var(--duration-fast) var(--ease-default),
-              box-shadow var(--duration-fast) var(--ease-default);
+  transition: background-color var(--duration-fast) var(--ease-default),
+              border-color var(--duration-fast) var(--ease-default);
 }
 
-.forge-block-card:hover {
-  background: rgba(255, 255, 255, 0.015);
+.forge-block-card--hovered {
+  background: var(--block-bg-hover);
 }
 
 .forge-block-card--success {
@@ -32,10 +32,46 @@
 
 .forge-block-card--error {
   border-left: 2px solid var(--error);
+  background: var(--block-error-bg);
 }
 
 .forge-block-card--running {
   border-left: 2px solid var(--warning);
+  animation: forge-block-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes forge-block-pulse {
+  0%, 100% {
+    border-left-color: var(--warning);
+  }
+  50% {
+    border-left-color: var(--warning-muted);
+  }
+}
+
+.forge-block-region {
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  transition: background-color var(--duration-fast) var(--ease-default);
+}
+
+.forge-block-region--input.forge-block-region--active {
+  background: var(--block-input-hover);
+}
+
+.forge-block-region--output.forge-block-region--active {
+  background: var(--block-output-hover);
+}
+
+.forge-block-region-divider {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  border-top: 1px dashed var(--block-region-divider);
+  pointer-events: none;
 }
 
 .forge-block-card__header {
@@ -54,6 +90,7 @@
   border: 1px solid var(--border-subtle);
   max-width: 50%;
   opacity: 0;
+  z-index: 2;
   transition: opacity var(--duration-fast) var(--ease-default);
 }
 
@@ -136,11 +173,12 @@
   -webkit-backdrop-filter: blur(4px);
   border: 1px solid var(--border-subtle);
   opacity: 0;
+  z-index: 2;
   transition: opacity var(--duration-fast) var(--ease-default);
 }
 
-.forge-block-card:hover .forge-block-card__header,
-.forge-block-card:hover .forge-block-actions,
+.forge-block-card--hovered .forge-block-card__header,
+.forge-block-actions--visible,
 .forge-block-actions:focus-within {
   opacity: 1;
 }

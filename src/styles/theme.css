@@ -52,6 +52,10 @@
   --block-divider: #232434;
   --block-bg-hover: rgba(255, 255, 255, 0.02);
   --block-input-bg: var(--surface-3);
+  --block-input-hover: rgba(255, 255, 255, 0.03);
+  --block-output-hover: rgba(255, 255, 255, 0.02);
+  --block-region-divider: rgba(255, 255, 255, 0.06);
+  --block-error-bg: rgba(247, 118, 142, 0.04);
 
   /* ─── Explorer sidebar ─── */
   --explorer-width: 260px;

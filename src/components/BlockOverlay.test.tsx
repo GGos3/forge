@@ -6,8 +6,8 @@ import BlockActions from "./BlockActions";
 describe("BlockOverlay", () => {
   it("renders block cards with correct positioning", () => {
     const blocks = [
-      { id: "1", top: 10, height: 100, command: "echo a", output: "a", exitCode: 0, timestamp: 123456789, isRunning: false },
-      { id: "2", top: 110, height: 100, command: "echo b", output: "b", exitCode: null, timestamp: 123456789, isRunning: false },
+      { id: "1", top: 10, height: 100, inputHeight: 20, command: "echo a", output: "a", exitCode: 0, timestamp: 123456789, isRunning: false },
+      { id: "2", top: 110, height: 100, inputHeight: 20, command: "echo b", output: "b", exitCode: null, timestamp: 123456789, isRunning: false },
     ];
 
     render(() => <BlockOverlay blocks={blocks} />);
@@ -22,7 +22,7 @@ describe("BlockOverlay", () => {
 
   it("shows success icon for exit code 0", () => {
     const blocks = [
-      { id: "1", top: 10, height: 100, command: "echo ok", output: "ok", exitCode: 0, timestamp: 123456789, isRunning: false },
+      { id: "1", top: 10, height: 100, inputHeight: 20, command: "echo ok", output: "ok", exitCode: 0, timestamp: 123456789, isRunning: false },
     ];
 
     render(() => <BlockOverlay blocks={blocks} />);
@@ -34,7 +34,7 @@ describe("BlockOverlay", () => {
 
   it("shows error styling and exit code for failed commands", () => {
     const blocks = [
-      { id: "1", top: 10, height: 100, command: "false", output: "", exitCode: 1, timestamp: 123456789, isRunning: false },
+      { id: "1", top: 10, height: 100, inputHeight: 20, command: "false", output: "", exitCode: 1, timestamp: 123456789, isRunning: false },
     ];
 
     render(() => <BlockOverlay blocks={blocks} />);
@@ -47,7 +47,7 @@ describe("BlockOverlay", () => {
 
   it("does not render blocks completely out of bounds", () => {
     const blocks = [
-      { id: "1", top: -200, height: 100, command: "a", output: "a", exitCode: 0, timestamp: 123456789, isRunning: false },
+      { id: "1", top: -200, height: 100, inputHeight: 20, command: "a", output: "a", exitCode: 0, timestamp: 123456789, isRunning: false },
     ];
 
     render(() => <BlockOverlay blocks={blocks} />);
@@ -57,7 +57,7 @@ describe("BlockOverlay", () => {
 
   it("renders command label, timestamp and running spinner", () => {
     const blocks = [
-      { id: "1", top: 10, height: 100, command: "sleep 10", output: "", exitCode: null, timestamp: 1672531200000, isRunning: true },
+      { id: "1", top: 10, height: 100, inputHeight: 20, command: "sleep 10", output: "", exitCode: null, timestamp: 1672531200000, isRunning: true },
     ];
 
     render(() => <BlockOverlay blocks={blocks} />);
@@ -71,8 +71,8 @@ describe("BlockOverlay", () => {
 
   it("shows exit code badge only for error blocks", () => {
     const blocks = [
-      { id: "ok", top: 10, height: 100, command: "echo ok", output: "ok", exitCode: 0, timestamp: 123456789, isRunning: false },
-      { id: "err", top: 120, height: 100, command: "fail", output: "", exitCode: 127, timestamp: 123456789, isRunning: false },
+      { id: "ok", top: 10, height: 100, inputHeight: 20, command: "echo ok", output: "ok", exitCode: 0, timestamp: 123456789, isRunning: false },
+      { id: "err", top: 120, height: 100, inputHeight: 20, command: "fail", output: "", exitCode: 127, timestamp: 123456789, isRunning: false },
     ];
 
     render(() => <BlockOverlay blocks={blocks} />);
@@ -122,7 +122,7 @@ describe("BlockActions", () => {
     render(() => <BlockActions command="echo test" output="test out" onCopy={handleCopy} />);
 
     fireEvent.click(screen.getByTitle("Copy Command + Output"));
-    expect(handleCopy).toHaveBeenCalledWith("echo test\ntest out");
+    expect(handleCopy).toHaveBeenCalledWith("$ echo test\ntest out");
   });
 
   it("shows check icon and Copied label after copying", async () => {

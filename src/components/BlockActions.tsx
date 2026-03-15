@@ -3,6 +3,7 @@ import { createSignal, Show } from "solid-js";
 interface BlockActionsProps {
   command: string;
   output: string;
+  isVisible?: boolean;
   onCopy?: (text: string) => void;
 }
 
@@ -22,7 +23,7 @@ export default function BlockActions(props: BlockActionsProps) {
   };
 
   return (
-    <div class="forge-block-actions" data-testid="block-actions">
+    <div class="forge-block-actions" classList={{ "forge-block-actions--visible": props.isVisible }} data-testid="block-actions">
       <button
         class="forge-block-action-btn"
         classList={{ "forge-block-action-btn--copied": copied() === "command" }}
@@ -68,7 +69,7 @@ export default function BlockActions(props: BlockActionsProps) {
       <button
         class="forge-block-action-btn"
         classList={{ "forge-block-action-btn--copied": copied() === "both" }}
-        onClick={() => handleCopy("both", `${props.command}\n${props.output}`)}
+        onClick={() => handleCopy("both", `$ ${props.command}\n${props.output}`)}
         title="Copy Command + Output"
       >
         <Show when={copied() === "both"} fallback={
