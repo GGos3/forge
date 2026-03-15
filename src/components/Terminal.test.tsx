@@ -9,6 +9,7 @@ type SessionExitHandler = (event: { payload: { session_id: string; exit_code: nu
 interface MockTerminal {
   cols: number;
   rows: number;
+  lines: MockBufferLine[];
   dataHandler?: (data: string) => void;
   inputDispose: ReturnType<typeof vi.fn>;
   open: ReturnType<typeof vi.fn>;
@@ -295,6 +296,66 @@ describe("Terminal", () => {
       const block = container.querySelector(".forge-block-card") as HTMLElement | null;
       expect(block).not.toBeNull();
       expect(block?.style.top).toBe("0px");
+    });
+  });
+
+  it("anchors sequential OSC blocks in one chunk to distinct rows", async () => {
+    const { container } = render(() =>
+      createComponent(Terminal, { sessionId: { value: "session-5" } as SessionId, focused: false })
+    );
+
+    await waitFor(() => expect(mockState.terminalInstances).toHaveLength(1));
+
+    const terminal = mockState.terminalInstances[0];
+    terminal.buffer.active.cursorY = 0;
+    terminal.write.mockImplementation((_: Uint8Array, callback?: () => void) => {
+      terminal.buffer.active.cursorY = 4;
+      callback?.();
+    });
+
+    const output = new TextEncoder().encode(
+      "\u001b]133;A\u0007\u001b]133;B\u0007echo one\n\u001b]133;C\u0007one\n\u001b]133;D;0\u0007\u001b]133;A\u0007\u001b]133;B\u0007echo two\n\u001b]133;C\u0007two\n\u001b]133;D;0\u0007"
+    );
+    mockState.sessionOutputHandler?.({
+      payload: { session_id: "session-5", data: Array.from(output) },
+    });
+
+    await waitFor(() => {
+      const blocks = Array.from(container.querySelectorAll(".forge-block-card")) as HTMLElement[];
+      expect(blocks).toHaveLength(2);
+      expect(blocks[0]?.style.top).toBe("0px");
+      expect(blocks[1]?.style.top).toBe("34px");
+    });
+  });
+
+  it("accounts for wrapped xterm rows when mapping later blocks", async () => {
+    const { container } = render(() =>
+      createComponent(Terminal, { sessionId: { value: "session-6" } as SessionId, focused: false })
+    );
+
+    await waitFor(() => expect(mockState.terminalInstances).toHaveLength(1));
+
+    const terminal = mockState.terminalInstances[0];
+    terminal.lines[1] = { isWrapped: true };
+    terminal.lines[2] = { isWrapped: false };
+    terminal.lines[3] = { isWrapped: false };
+    terminal.buffer.active.cursorY = 0;
+    terminal.write.mockImplementation((_: Uint8Array, callback?: () => void) => {
+      terminal.buffer.active.cursorY = 4;
+      callback?.();
+    });
+
+    const output = new TextEncoder().encode(
+      "\u001b]133;A\u0007\u001b]133;B\u0007echo one\n\u001b]133;C\u0007one\n\u001b]133;D;0\u0007\u001b]133;A\u0007\u001b]133;B\u0007echo two\n\u001b]133;C\u0007two\n\u001b]133;D;0\u0007"
+    );
+    mockState.sessionOutputHandler?.({
+      payload: { session_id: "session-6", data: Array.from(output) },
+    });
+
+    await waitFor(() => {
+      const blocks = Array.from(container.querySelectorAll(".forge-block-card")) as HTMLElement[];
+      expect(blocks).toHaveLength(2);
+      expect(blocks[1]?.style.top).toBe("51px");
     });
   });
 });

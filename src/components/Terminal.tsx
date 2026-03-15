@@ -293,6 +293,7 @@ export default function Terminal(props: TerminalProps) {
       const rawBytes = new Uint8Array(event.payload.data);
       const str = textDecoder.decode(rawBytes);
       const preWriteRow = cursorRow();
+      const preFeedLine = blockParser.getLineNumber();
       const prevBlockIds = new Set(blockParser.getBlocks().map(b => b.id));
       const prevCurrentId = blockParser.getCurrentBlock()?.id;
       if (prevCurrentId) prevBlockIds.add(prevCurrentId);
@@ -304,17 +305,39 @@ export default function Terminal(props: TerminalProps) {
       const snapshotAll = [...snapshotBlocks, ...(snapshotCurrent ? [snapshotCurrent] : [])];
 
       xterm.write(new Uint8Array(event.payload.data), () => {
+        const rowForParserLine = (line: number) => {
+          const logicalOffset = Math.max(0, line - preFeedLine);
+          if (logicalOffset === 0) {
+            return preWriteRow;
+          }
+
+          let row = preWriteRow;
+          let remaining = logicalOffset;
+
+          while (remaining > 0) {
+            row += 1;
+            const bufferLine = terminal?.buffer.active.getLine(row);
+            if (!bufferLine) {
+              return preWriteRow + logicalOffset;
+            }
+
+            if (!bufferLine.isWrapped) {
+              remaining -= 1;
+            }
+          }
+
+          return row;
+        };
+
         for (const b of snapshotAll) {
           if (!prevBlockIds.has(b.id) && !blockStartRows.has(b.id)) {
-            blockStartRows.set(b.id, preWriteRow);
+            blockStartRows.set(b.id, rowForParserLine(b.startLine));
           }
         }
 
         for (const b of snapshotAll) {
           if (!blockOutputStartRows.has(b.id) && b.outputStartLine > b.startLine) {
-            const bStart = blockStartRows.get(b.id) ?? 0;
-            const outputOffset = b.outputStartLine - b.startLine;
-            blockOutputStartRows.set(b.id, bStart + outputOffset);
+            blockOutputStartRows.set(b.id, rowForParserLine(b.outputStartLine));
           }
         }
 

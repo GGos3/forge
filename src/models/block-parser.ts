@@ -94,6 +94,10 @@ export class BlockParser {
     return this.currentBlock ? cloneBlock(this.currentBlock) : null;
   }
 
+  getLineNumber(): number {
+    return this.lineNumber;
+  }
+
   reset(): void {
     this.completedBlocks.length = 0;
     this.currentBlock = null;
