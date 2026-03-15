@@ -146,6 +146,7 @@ export class BlockParser {
       if (!this.currentBlock) {
         this.currentBlock = this.createEmptyBlock();
       }
+      this.currentBlock.outputStartLine = this.lineNumber;
       this.state = "output";
       return;
     }
@@ -227,6 +228,7 @@ export class BlockParser {
         output: "",
         startLine: lineNumber,
         endLine: lineNumber,
+        outputStartLine: lineNumber + 1,
         exitCode: null,
         timestamp: Date.now(),
       };
@@ -253,6 +255,7 @@ export class BlockParser {
       output: "",
       startLine: line,
       endLine: line,
+      outputStartLine: line,
       exitCode: null,
       timestamp: Date.now(),
     };
