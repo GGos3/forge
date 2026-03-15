@@ -272,20 +272,32 @@ export default function Terminal(props: TerminalProps) {
       const rawBytes = new Uint8Array(event.payload.data);
       const str = textDecoder.decode(rawBytes);
       const preWriteRow = cursorRow();
-      const prevBlockId = blockParser.getCurrentBlock()?.id;
+      const prevBlockIds = new Set(blockParser.getBlocks().map(b => b.id));
+      const prevCurrentId = blockParser.getCurrentBlock()?.id;
+      if (prevCurrentId) prevBlockIds.add(prevCurrentId);
+
       blockParser.feed(str);
-      const newBlockId = blockParser.getCurrentBlock()?.id;
 
       xterm.write(new Uint8Array(event.payload.data), () => {
-        if (newBlockId && newBlockId !== prevBlockId && !blockStartRows.has(newBlockId)) {
-          blockStartRows.set(newBlockId, Math.max(0, preWriteRow - 1));
+        const blockStartRow = Math.max(0, preWriteRow);
+
+        const allBlocks = blockParser.getBlocks();
+        const currentBlock = blockParser.getCurrentBlock();
+        const allBlockIds = allBlocks.map(b => b.id);
+        if (currentBlock) allBlockIds.push(currentBlock.id);
+
+        for (const id of allBlockIds) {
+          if (!prevBlockIds.has(id) && !blockStartRows.has(id)) {
+            blockStartRows.set(id, blockStartRow);
+          }
         }
 
-        const currentParsedBlock = blockParser.getCurrentBlock();
-        if (currentParsedBlock && !blockOutputStartRows.has(currentParsedBlock.id) && currentParsedBlock.outputStartLine > currentParsedBlock.startLine) {
-          const blockStart = blockStartRows.get(currentParsedBlock.id) ?? 0;
-          const outputOffset = currentParsedBlock.outputStartLine - currentParsedBlock.startLine;
-          blockOutputStartRows.set(currentParsedBlock.id, blockStart + outputOffset);
+        for (const b of [...allBlocks, ...(currentBlock ? [currentBlock] : [])]) {
+          if (!blockOutputStartRows.has(b.id) && b.outputStartLine > b.startLine) {
+            const bStart = blockStartRows.get(b.id) ?? 0;
+            const outputOffset = b.outputStartLine - b.startLine;
+            blockOutputStartRows.set(b.id, bStart + outputOffset);
+          }
         }
 
         updateBlocksUI();
