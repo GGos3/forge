@@ -149,9 +149,9 @@ export default function Terminal(props: TerminalProps) {
       const cellHeight = getCellHeight(terminal);
       if (cellHeight === 0 || Number.isNaN(cellHeight)) return;
 
-      const xtermRows = terminal.element?.querySelector('.xterm-rows');
-      const rowsOffsetY = xtermRows && containerRef
-        ? xtermRows.getBoundingClientRect().top - containerRef.getBoundingClientRect().top
+      const xtermScreen = terminal.element?.querySelector('.xterm-screen');
+      const rowsOffsetY = xtermScreen && containerRef
+        ? xtermScreen.getBoundingClientRect().top - containerRef.getBoundingClientRect().top
         : 0;
 
       const uiItems: BlockUiItem[] = [];
