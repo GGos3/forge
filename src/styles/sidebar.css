@@ -2,6 +2,7 @@
   display: flex;
   height: 100%;
   flex-shrink: 0;
+  position: relative;
 }
 
 .forge-nav-rail {
@@ -60,7 +61,12 @@
   border-right: 1px solid var(--border);
   box-sizing: border-box;
   overflow: hidden;
-  flex-shrink: 0;
+  position: absolute;
+  top: 0;
+  left: var(--nav-rail-width);
+  bottom: 0;
+  z-index: var(--z-dropdown);
+  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.3);
 }
 
 .forge-sidebar-panel__header {

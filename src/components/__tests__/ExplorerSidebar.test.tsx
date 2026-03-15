@@ -248,4 +248,12 @@ describe("App Sidebar Integration", () => {
     fireEvent.click(screen.getByTestId("nav-explorer"));
     expect(screen.queryByTestId("sidebar-panel")).toBeNull();
   });
+
+  it("sidebar panel and nav rail coexist when panel is open", () => {
+    render(() => <App />);
+
+    fireEvent.click(screen.getByTestId("nav-explorer"));
+    expect(screen.queryByTestId("sidebar-panel")).toBeTruthy();
+    expect(screen.getByTestId("nav-rail")).toBeTruthy();
+  });
 });
