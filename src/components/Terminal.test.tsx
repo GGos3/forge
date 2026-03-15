@@ -113,19 +113,15 @@ vi.mock("@xterm/xterm", () => ({
     element = {
       clientHeight: 100,
       querySelector: vi.fn((selector: string) => {
-        if (selector === '.xterm-char-measure-element') {
+        if (selector === '.xterm-rows') {
           return {
-            getBoundingClientRect: () => ({
-              height: 17,
-              width: 8,
-              top: 0,
-              left: 0,
-              bottom: 17,
-              right: 8,
-              x: 0,
-              y: 0,
-              toJSON: () => ({}),
-            }),
+            children: [{
+              getBoundingClientRect: () => ({
+                height: 17, width: 800,
+                top: 0, left: 0, bottom: 17, right: 800,
+                x: 0, y: 0, toJSON: () => ({}),
+              }),
+            }],
           };
         }
         return null;

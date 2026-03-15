@@ -24,10 +24,16 @@ function getSessionValue(sessionId: SessionId | string): string {
 }
 
 function getCellHeight(terminal: XTerm): number {
-  const measureEl = terminal.element?.querySelector('.xterm-char-measure-element');
-  if (measureEl) {
-    const rect = measureEl.getBoundingClientRect();
-    if (rect.height > 0) return rect.height;
+  const rowContainer = terminal.element?.querySelector('.xterm-rows');
+  if (rowContainer && rowContainer.children.length > 0) {
+    const row = rowContainer.children[0] as HTMLElement;
+    const h = row.getBoundingClientRect().height;
+    if (h > 0) return h;
+  }
+  const screen = terminal.element?.querySelector('.xterm-screen');
+  if (screen) {
+    const h = screen.getBoundingClientRect().height;
+    if (h > 0 && terminal.rows > 0) return h / terminal.rows;
   }
   return (terminal.element?.clientHeight || 0) / terminal.rows;
 }
