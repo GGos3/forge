@@ -195,7 +195,8 @@ function marker(content: string): string {
 }
 
 function promptFor(session: SessionState): string {
-  return session.shell === "powershell" ? "PS forge-e2e> " : "forge-e2e$ ";
+  if (session.shell === "powershell") return "PS forge-e2e> ";
+  return "forge \x1b[1;35m❯\x1b[0m ";
 }
 
 function getState(): BackendState {

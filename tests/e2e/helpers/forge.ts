@@ -1,6 +1,6 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 
-const PROMPT_TEXT = "forge-e2e$";
+const PROMPT_TEXT = "forge ❯";
 
 type ShortcutPayload = {
   key: string;

@@ -6,5 +6,5 @@ test("launches with a tab bar and a live terminal", async ({ page }) => {
 
   await expect(page.locator(".forge-tab")).toHaveCount(1);
   await expect(visiblePaneWrappers(page)).toHaveCount(1);
-  await expectTerminalText(page, 0, "forge-e2e$");
+  await expectTerminalText(page, 0, "forge ❯");
 });

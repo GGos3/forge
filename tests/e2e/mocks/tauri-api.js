@@ -211,7 +211,8 @@ function marker(content) {
 }
 
 function promptFor(shell) {
-  return shell === "powershell" ? "PS forge-e2e> " : "forge-e2e$ ";
+  if (shell === "powershell") return "PS forge-e2e> ";
+  return "forge \x1b[1;35m❯\x1b[0m ";
 }
 
 function emit(event, payload) {
