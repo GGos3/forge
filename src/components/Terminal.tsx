@@ -306,19 +306,24 @@ export default function Terminal(props: TerminalProps) {
 
       xterm.write(new Uint8Array(event.payload.data), () => {
         const rowForParserLine = (line: number) => {
-          const logicalOffset = Math.max(0, line - preFeedLine);
+          const logicalOffset = line - preFeedLine;
           if (logicalOffset === 0) {
             return preWriteRow;
           }
 
           let row = preWriteRow;
-          let remaining = logicalOffset;
+          let remaining = Math.abs(logicalOffset);
+          const direction = logicalOffset > 0 ? 1 : -1;
 
           while (remaining > 0) {
-            row += 1;
+            row += direction;
+            if (row < 0) {
+              return Math.max(0, preWriteRow + logicalOffset);
+            }
+
             const bufferLine = terminal?.buffer.active.getLine(row);
             if (!bufferLine) {
-              return preWriteRow + logicalOffset;
+              return Math.max(0, preWriteRow + logicalOffset);
             }
 
             if (!bufferLine.isWrapped) {

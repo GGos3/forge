@@ -328,9 +328,47 @@ describe("Terminal", () => {
     });
   });
 
-  it("accounts for wrapped xterm rows when mapping later blocks", async () => {
+  it("maps inline OSC blocks back to the previous row when the cursor already advanced", async () => {
     const { container } = render(() =>
       createComponent(Terminal, { sessionId: { value: "session-6" } as SessionId, focused: false })
+    );
+
+    await waitFor(() => expect(mockState.terminalInstances).toHaveLength(1));
+
+    const terminal = mockState.terminalInstances[0];
+    terminal.buffer.active.cursorY = 0;
+    terminal.write.mockImplementationOnce((_: Uint8Array, callback?: () => void) => {
+      terminal.buffer.active.cursorY = 1;
+      callback?.();
+    });
+    mockState.sessionOutputHandler?.({
+      payload: {
+        session_id: "session-6",
+        data: Array.from(new TextEncoder().encode("\u001b]133;A\u0007\n")),
+      },
+    });
+
+    terminal.write.mockImplementationOnce((_: Uint8Array, callback?: () => void) => {
+      terminal.buffer.active.cursorY = 1;
+      callback?.();
+    });
+    mockState.sessionOutputHandler?.({
+      payload: {
+        session_id: "session-6",
+        data: Array.from(new TextEncoder().encode("\u001b]133;B;echo inline\u0007")),
+      },
+    });
+
+    await waitFor(() => {
+      const block = container.querySelector(".forge-block-card") as HTMLElement | null;
+      expect(block).not.toBeNull();
+      expect(block?.style.top).toBe("0px");
+    });
+  });
+
+  it("accounts for wrapped xterm rows when mapping later blocks", async () => {
+    const { container } = render(() =>
+      createComponent(Terminal, { sessionId: { value: "session-7" } as SessionId, focused: false })
     );
 
     await waitFor(() => expect(mockState.terminalInstances).toHaveLength(1));
@@ -349,7 +387,7 @@ describe("Terminal", () => {
       "\u001b]133;A\u0007\u001b]133;B\u0007echo one\n\u001b]133;C\u0007one\n\u001b]133;D;0\u0007\u001b]133;A\u0007\u001b]133;B\u0007echo two\n\u001b]133;C\u0007two\n\u001b]133;D;0\u0007"
     );
     mockState.sessionOutputHandler?.({
-      payload: { session_id: "session-6", data: Array.from(output) },
+      payload: { session_id: "session-7", data: Array.from(output) },
     });
 
     await waitFor(() => {
