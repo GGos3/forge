@@ -130,40 +130,44 @@ export default function BlockOverlay(props: BlockOverlayProps) {
                   <div class="forge-block-region-divider" style={{ top: `${block.inputHeight}px` }} />
                 </Show>
 
-                <div class="forge-block-card__header">
-                  <div class="forge-block-card__status">
-                    <Show when={blockStatus(block) === "success"}>
-                      <svg class="forge-block-card__icon forge-block-card__icon--success" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" data-testid="status-success">
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    </Show>
-                    <Show when={blockStatus(block) === "error"}>
-                      <svg class="forge-block-card__icon forge-block-card__icon--error" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" data-testid="status-error">
-                        <line x1="18" y1="6" x2="6" y2="18" />
-                        <line x1="6" y1="6" x2="18" y2="18" />
-                      </svg>
-                    </Show>
-                    <Show when={blockStatus(block) === "running"}>
-                      <div class="forge-block-card__spinner" data-testid="running-indicator" />
+                <div class="forge-block-toolbar" classList={{ "forge-block-toolbar--visible": isHovered() }}>
+                  <div class="forge-block-toolbar__info">
+                    <div class="forge-block-card__status">
+                      <Show when={blockStatus(block) === "success"}>
+                        <svg class="forge-block-card__icon forge-block-card__icon--success" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" data-testid="status-success">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      </Show>
+                      <Show when={blockStatus(block) === "error"}>
+                        <svg class="forge-block-card__icon forge-block-card__icon--error" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" data-testid="status-error">
+                          <line x1="18" y1="6" x2="6" y2="18" />
+                          <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                      </Show>
+                      <Show when={blockStatus(block) === "running"}>
+                        <div class="forge-block-card__spinner" data-testid="running-indicator" />
+                      </Show>
+                    </div>
+
+                    <span class="forge-block-card__command" title={block.command}>
+                      {block.command || "Command"}
+                    </span>
+
+                    <span class="forge-block-card__time">
+                      {formatTimestamp(block.timestamp)}
+                    </span>
+
+                    <Show when={blockStatus(block) === "error" && block.exitCode !== null}>
+                      <span class="forge-block-card__exit-code" data-testid="exit-code">
+                        exit {block.exitCode}
+                      </span>
                     </Show>
                   </div>
 
-                  <span class="forge-block-card__command" title={block.command}>
-                    {block.command || "Command"}
-                  </span>
+                  <div class="forge-block-toolbar__divider" />
 
-                  <span class="forge-block-card__time">
-                    {formatTimestamp(block.timestamp)}
-                  </span>
-
-                  <Show when={blockStatus(block) === "error" && block.exitCode !== null}>
-                    <span class="forge-block-card__exit-code" data-testid="exit-code">
-                      exit {block.exitCode}
-                    </span>
-                  </Show>
+                  <BlockActions command={block.command} output={block.output} isVisible={isHovered()} />
                 </div>
-
-                <BlockActions command={block.command} output={block.output} isVisible={isHovered()} />
               </div>
             </Show>
           );

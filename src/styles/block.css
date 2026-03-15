@@ -74,24 +74,43 @@
   pointer-events: none;
 }
 
-.forge-block-card__header {
+.forge-block-toolbar {
   pointer-events: auto;
   position: absolute;
   top: 0;
   right: 0;
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: 2px var(--space-2);
+  gap: 0;
+  padding: 2px var(--space-1);
   border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--surface-3) 92%, transparent);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: color-mix(in srgb, var(--surface-3) 95%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--border-subtle);
-  max-width: 50%;
+  max-width: 70%;
   opacity: 0;
   z-index: 2;
   transition: opacity var(--duration-fast) var(--ease-default);
+}
+
+.forge-block-toolbar--visible {
+  opacity: 1;
+}
+
+.forge-block-toolbar__info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0 var(--space-1);
+}
+
+.forge-block-toolbar__divider {
+  width: 1px;
+  height: 14px;
+  background: var(--border);
+  margin: 0 var(--space-1);
+  flex-shrink: 0;
 }
 
 .forge-block-card__status {
@@ -99,8 +118,8 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
 }
 
 .forge-block-card__icon {
@@ -160,56 +179,34 @@
 }
 
 .forge-block-actions {
-  pointer-events: auto;
-  position: absolute;
-  bottom: 0;
-  right: 0;
   display: flex;
   gap: var(--space-1);
-  padding: 2px var(--space-2);
-  border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--surface-3) 92%, transparent);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border: 1px solid var(--border-subtle);
-  opacity: 0;
-  z-index: 2;
-  transition: opacity var(--duration-fast) var(--ease-default);
-}
-
-.forge-block-card--hovered .forge-block-card__header,
-.forge-block-actions--visible,
-.forge-block-actions:focus-within {
-  opacity: 1;
+  padding: 0 var(--space-1);
 }
 
 .forge-block-action-btn {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
-  background: var(--surface-4);
-  border: 1px solid var(--border);
-  color: var(--text-secondary);
-  border-radius: var(--radius-sm);
-  padding: 2px var(--space-2);
-  font-size: var(--text-xs);
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  border-radius: var(--radius-xs);
+  padding: 3px;
   cursor: pointer;
   transition: background-color var(--duration-fast) var(--ease-default),
-              color var(--duration-fast) var(--ease-default),
-              border-color var(--duration-fast) var(--ease-default);
+              color var(--duration-fast) var(--ease-default);
 }
 
 .forge-block-action-btn:hover {
   background: var(--surface-5);
   color: var(--text-primary);
-  border-color: var(--border-strong);
 }
 
 .forge-block-action-btn--copied {
   color: var(--success);
-  border-color: var(--success-muted);
 }
 
 .forge-block-action-btn__label {
-  line-height: 1;
+  display: none;
 }
