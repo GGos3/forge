@@ -9,6 +9,7 @@ import {
   getAllTerminalPanes,
   resizePane,
   splitPane,
+  splitPaneAt,
 } from "./pane-tree";
 
 function makeSession(value: string): SessionId {
@@ -222,5 +223,124 @@ describe("pane-tree model", () => {
         expect(findPane(tree, id)).not.toBeNull();
       }
     }
+  });
+
+  describe("splitPaneAt", () => {
+    it("position 'after' puts new pane in second (same as splitPane)", () => {
+      const root = makeTerminal("p1");
+
+      const result = splitPaneAt(root, "p1", "vertical", "after");
+      expect(result.type).toBe("split");
+      if (result.type !== "split") {
+        return;
+      }
+
+      expect(result.first).toBe(root);
+      expect(result.second.type).toBe("terminal");
+    });
+
+    it("position 'before' puts new pane in first, original in second", () => {
+      const root = makeTerminal("p1");
+
+      const result = splitPaneAt(root, "p1", "vertical", "before");
+      expect(result.type).toBe("split");
+      if (result.type !== "split") {
+        return;
+      }
+
+      expect(result.first.type).toBe("terminal");
+      expect(result.second).toBe(root);
+    });
+
+    it("returns tree unchanged when target not found", () => {
+      const root = makeTerminal("p1");
+
+      const result = splitPaneAt(root, "nonexistent", "vertical", "after");
+      expect(result).toBe(root);
+    });
+
+    it("targets correct pane in nested tree", () => {
+      const left = makeTerminal("left");
+      const right = makeTerminal("right");
+      const tree: PaneNode = {
+        type: "split",
+        id: "root",
+        direction: "vertical",
+        ratio: 0.5,
+        first: left,
+        second: right,
+      };
+
+      const result = splitPaneAt(tree, "right", "horizontal", "after");
+      expect(result.type).toBe("split");
+      if (result.type !== "split") {
+        return;
+      }
+
+      // First branch should be unchanged
+      expect(result.first).toBe(left);
+
+      // Second branch should now be a split
+      expect(result.second.type).toBe("split");
+      if (result.second.type !== "split") {
+        return;
+      }
+      expect(result.second.first).toBe(right);
+      expect(result.second.second.type).toBe("terminal");
+    });
+
+    it("preserves other branches unchanged", () => {
+      const a = makeTerminal("a");
+      const b = makeTerminal("b");
+      const c = makeTerminal("c");
+      const tree: PaneNode = {
+        type: "split",
+        id: "root",
+        direction: "vertical",
+        ratio: 0.5,
+        first: {
+          type: "split",
+          id: "left-split",
+          direction: "horizontal",
+          ratio: 0.5,
+          first: a,
+          second: b,
+        },
+        second: c,
+      };
+
+      const result = splitPaneAt(tree, "a", "vertical", "after");
+      expect(result.type).toBe("split");
+      if (result.type !== "split") {
+        return;
+      }
+
+      // The left-split should have changed (a was split)
+      expect(result.first).not.toBe(tree.first);
+      const firstBranch = result.first;
+      expect(firstBranch.type).toBe("split");
+      if (firstBranch.type !== "split") {
+        return;
+      }
+      // firstBranch is the modified left-split
+      // Its first child is the new split containing a and new pane
+      const newSplit = firstBranch.first;
+      expect(newSplit.type).toBe("split");
+      if (newSplit.type !== "split") {
+        return;
+      }
+      // The new split's first should be terminal a
+      expect(newSplit.first.type).toBe("terminal");
+      if (newSplit.first.type !== "terminal") {
+        return;
+      }
+      expect(newSplit.first.id).toBe("a");
+      expect(newSplit.second.type).toBe("terminal");
+
+      // The right branch (c) should be unchanged (referential equality)
+      const secondBranch = result.second;
+      expect(secondBranch.type).toBe("terminal");
+      expect(secondBranch).toBe(c);
+    });
   });
 });

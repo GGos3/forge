@@ -1,4 +1,4 @@
-import type { PaneId, PaneNode, SplitDirection, SplitPane, TerminalPane } from "../types/pane";
+import type { PaneId, PaneNode, SplitDirection, SplitPane, SplitPosition, TerminalPane } from "../types/pane";
 import type { SessionId } from "../types/session";
 
 type FocusDirection = "up" | "down" | "left" | "right";
@@ -92,6 +92,41 @@ export function splitPane(tree: PaneNode, targetPaneId: PaneId, direction: Split
   }
 
   const nextSecond = splitPane(tree.second, targetPaneId, direction);
+  if (nextSecond !== tree.second) {
+    return { ...tree, second: nextSecond };
+  }
+
+  return tree;
+}
+
+export function splitPaneAt(
+  tree: PaneNode,
+  targetPaneId: PaneId,
+  direction: SplitDirection,
+  position: SplitPosition,
+): PaneNode {
+  if (tree.type === "terminal") {
+    if (tree.id !== targetPaneId) {
+      return tree;
+    }
+
+    const newPane = createTerminalPane(createGeneratedSessionId());
+    return {
+      type: "split",
+      id: createId("split"),
+      direction,
+      first: position === "before" ? newPane : tree,
+      second: position === "before" ? tree : newPane,
+      ratio: 0.5,
+    };
+  }
+
+  const nextFirst = splitPaneAt(tree.first, targetPaneId, direction, position);
+  if (nextFirst !== tree.first) {
+    return { ...tree, first: nextFirst };
+  }
+
+  const nextSecond = splitPaneAt(tree.second, targetPaneId, direction, position);
   if (nextSecond !== tree.second) {
     return { ...tree, second: nextSecond };
   }
