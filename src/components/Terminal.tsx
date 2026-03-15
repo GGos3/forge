@@ -149,6 +149,11 @@ export default function Terminal(props: TerminalProps) {
       const cellHeight = getCellHeight(terminal);
       if (cellHeight === 0 || Number.isNaN(cellHeight)) return;
 
+      const xtermRows = terminal.element?.querySelector('.xterm-rows');
+      const rowsOffsetY = xtermRows && containerRef
+        ? xtermRows.getBoundingClientRect().top - containerRef.getBoundingClientRect().top
+        : 0;
+
       const uiItems: BlockUiItem[] = [];
 
       for (let i = 0; i < blocksToRender.length; i++) {
@@ -160,7 +165,7 @@ export default function Terminal(props: TerminalProps) {
           : Math.max(startRow + 1, cursorRow());
 
         const relativeRow = startRow - viewportY;
-        const top = relativeRow * cellHeight;
+        const top = relativeRow * cellHeight + rowsOffsetY;
         const relativeEndRow = endRow - viewportY;
         const height = (relativeEndRow - relativeRow) * cellHeight;
 

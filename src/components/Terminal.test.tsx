@@ -122,6 +122,11 @@ vi.mock("@xterm/xterm", () => ({
                 x: 0, y: 0, toJSON: () => ({}),
               }),
             }],
+            getBoundingClientRect: () => ({
+              height: 408, width: 800,
+              top: 0, left: 0, bottom: 408, right: 800,
+              x: 0, y: 0, toJSON: () => ({}),
+            }),
           };
         }
         return null;
