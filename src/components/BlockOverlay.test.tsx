@@ -125,14 +125,15 @@ describe("BlockActions", () => {
     expect(handleCopy).toHaveBeenCalledWith("$ echo test\ntest out");
   });
 
-  it("shows check icon and Copied label after copying", async () => {
+  it("shows copied state after clicking copy", async () => {
     const handleCopy = vi.fn();
     render(() => <BlockActions command="echo test" output="test out" onCopy={handleCopy} />);
 
     fireEvent.click(screen.getByTitle("Copy Command"));
 
     await vi.waitFor(() => {
-      expect(screen.getByText("Copied")).toBeTruthy();
+      const btn = screen.getByTitle("Copy Command");
+      expect(btn.classList.contains("forge-block-action-btn--copied")).toBe(true);
     });
   });
 });
