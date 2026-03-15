@@ -306,9 +306,10 @@ export default function Terminal(props: TerminalProps) {
       xterm.write(new Uint8Array(event.payload.data), () => {
         const postWriteRow = cursorRow();
 
+        const completedIds = new Set(snapshotBlocks.map(b => b.id));
         for (const b of snapshotAll) {
           if (!prevBlockIds.has(b.id) && !blockStartRows.has(b.id)) {
-            blockStartRows.set(b.id, b.source === "fallback" ? preWriteRow : postWriteRow);
+            blockStartRows.set(b.id, completedIds.has(b.id) ? preWriteRow : postWriteRow);
           }
         }
 
