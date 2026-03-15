@@ -1,4 +1,5 @@
 typeset -g __forge_osc133_command_started=0
+typeset -g PROMPT_EOL_MARK=""
 
 __forge_osc133_emit() {
   printf '\033]133;%s\007' "$1"
