@@ -1,8 +1,12 @@
-import { Show } from "solid-js";
+import { Show, createSignal } from "solid-js";
 import { paneStore } from "../stores/pane";
+import { tabStore } from "../stores/tab";
+import { dragStore } from "../stores/drag";
+import { computeDropZone, zoneToSplit } from "../utils/drop-zone";
 import PaneDivider from "./PaneDivider";
 import TerminalPane from "./TerminalPane";
-import type { PaneNode, SplitPane } from "../types/pane";
+import DropZoneOverlay from "./DropZoneOverlay";
+import type { DropZone, PaneNode, SplitPane } from "../types/pane";
 import type { TabId } from "../types/tab";
 
 interface PaneContainerProps {
@@ -65,11 +69,55 @@ function SplitContainer(props: { tabId: TabId; split: SplitPane }) {
 
 export default function PaneContainer(props: PaneContainerProps) {
   const isTerminal = () => props.node.type === "terminal";
+  const [activeZone, setActiveZone] = createSignal<DropZone | null>(null);
+  let wrapperRef: HTMLDivElement | undefined;
+
+  const isSelfDrag = (): boolean => {
+    const source = dragStore.source;
+    if (!source || source.type !== "tab") return false;
+    const tab = tabStore.tabs.find((t) => t.id === source.tabId);
+    return !!tab && tab.root.type === "terminal" && tab.root.id === props.node.id;
+  };
+
+  const handleDragOver = (e: DragEvent) => {
+    if (!dragStore.isDragging || isSelfDrag()) return;
+    e.preventDefault();
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = "move";
+    }
+    if (!wrapperRef) return;
+    const rect = wrapperRef.getBoundingClientRect();
+    const zone = computeDropZone(e.clientX, e.clientY, rect);
+    setActiveZone(zone);
+    dragStore.updateTarget({ paneId: props.node.id, zone });
+  };
+
+  const handleDragLeave = (e: DragEvent) => {
+    if (!wrapperRef) return;
+    const related = e.relatedTarget as Node | null;
+    if (related && wrapperRef.contains(related)) return;
+    setActiveZone(null);
+    dragStore.updateTarget(null);
+  };
+
+  const handleDrop = (e: DragEvent) => {
+    e.preventDefault();
+    const zone = activeZone();
+    setActiveZone(null);
+    if (!zone || props.node.type !== "terminal") {
+      dragStore.endDrag();
+      return;
+    }
+    const { direction, position } = zoneToSplit(zone);
+    void paneStore.splitPaneAt(props.node.id, direction, position);
+    dragStore.endDrag();
+  };
 
   return (
     <>
       <Show when={isTerminal()}>
         <div
+          ref={wrapperRef}
           class="forge-pane-terminal-wrapper"
           data-focused={paneStore.activePaneId === props.node.id}
           onClick={() => {
@@ -77,12 +125,16 @@ export default function PaneContainer(props: PaneContainerProps) {
               paneStore.focusPane(props.node.id);
             }
           }}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
         >
           <TerminalPane
             tabId={props.tabId}
             paneId={props.node.id}
             focused={props.node.type === "terminal" && paneStore.activePaneId === props.node.id}
           />
+          <DropZoneOverlay activeZone={activeZone()} />
         </div>
       </Show>
       <Show when={!isTerminal() && props.node.type === "split" ? props.node as SplitPane : undefined}>

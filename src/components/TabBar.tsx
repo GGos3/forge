@@ -1,6 +1,7 @@
 import { For, Show, createSignal, onCleanup, onMount } from "solid-js";
 import { VsTerminalLinux } from "solid-icons/vs";
 import { tabStore } from "../stores/tab";
+import { dragStore, FORGE_TAB_MIME } from "../stores/drag";
 import NewTabDialog from "./NewTabDialog";
 import type { ShellType } from "../types/session";
 import type { TabId } from "../types/tab";
@@ -79,9 +80,11 @@ export default function TabBar() {
 
   const handleDragStart = (tabId: TabId, e: DragEvent) => {
     setDragTabId(tabId);
+    dragStore.startDrag({ type: "tab", tabId });
     if (e.dataTransfer) {
       e.dataTransfer.effectAllowed = "move";
       e.dataTransfer.setData("text/plain", tabId);
+      e.dataTransfer.setData(FORGE_TAB_MIME, tabId);
     }
   };
 
@@ -118,6 +121,7 @@ export default function TabBar() {
   const handleDragEnd = () => {
     setDragTabId(null);
     setDragOverTabId(null);
+    dragStore.endDrag();
   };
 
   const cancelInteractiveDrag = (e: MouseEvent | PointerEvent | DragEvent) => {

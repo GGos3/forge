@@ -111,3 +111,53 @@
 .forge-terminal-error {
   color: var(--error);
 }
+
+/* ─── Drop Zone Overlay ─── */
+
+.forge-drop-zone-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-overlay);
+  pointer-events: none;
+}
+
+.forge-drop-zone {
+  position: absolute;
+  border-radius: var(--radius-sm);
+  border: 2px solid transparent;
+  transition: background-color var(--duration-fast) var(--ease-default),
+              border-color var(--duration-fast) var(--ease-default);
+}
+
+.forge-drop-zone--top {
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  height: calc(50% - 6px);
+}
+
+.forge-drop-zone--bottom {
+  bottom: 4px;
+  left: 4px;
+  right: 4px;
+  height: calc(50% - 6px);
+}
+
+.forge-drop-zone--left {
+  top: 4px;
+  left: 4px;
+  bottom: 4px;
+  width: calc(50% - 6px);
+}
+
+.forge-drop-zone--right {
+  top: 4px;
+  right: 4px;
+  bottom: 4px;
+  width: calc(50% - 6px);
+}
+
+.forge-drop-zone[data-active="true"] {
+  background-color: var(--accent-muted);
+  border-color: var(--accent);
+}
