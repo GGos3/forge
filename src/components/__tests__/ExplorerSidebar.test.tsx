@@ -256,4 +256,26 @@ describe("App Sidebar Integration", () => {
     expect(screen.queryByTestId("sidebar-panel")).toBeTruthy();
     expect(screen.getByTestId("nav-rail")).toBeTruthy();
   });
+
+  it("closes sidebar panel on Escape", () => {
+    render(() => <App />);
+
+    fireEvent.click(screen.getByTestId("nav-explorer"));
+    expect(screen.queryByTestId("sidebar-panel")).toBeTruthy();
+
+    fireEvent.keyDown(window, { key: "Escape" });
+
+    expect(screen.queryByTestId("sidebar-panel")).toBeNull();
+  });
+
+  it("closes sidebar panel when clicking outside the sidebar", () => {
+    render(() => <App />);
+
+    fireEvent.click(screen.getByTestId("nav-explorer"));
+    expect(screen.queryByTestId("sidebar-panel")).toBeTruthy();
+
+    fireEvent.pointerDown(document.body);
+
+    expect(screen.queryByTestId("sidebar-panel")).toBeNull();
+  });
 });

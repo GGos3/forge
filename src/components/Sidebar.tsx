@@ -1,4 +1,4 @@
-import { Component, Match, Show, Switch } from "solid-js";
+import { Component, Match, Show, Switch, onCleanup, onMount } from "solid-js";
 import { invoke } from "@tauri-apps/api/core";
 import NavRail from "./NavRail";
 import FileTree from "./FileTree";
@@ -14,6 +14,8 @@ import { editorStore } from "../stores/editor";
 import { connectionStore } from "../stores/connection";
 
 const Sidebar: Component = () => {
+  let sidebarRef: HTMLDivElement | undefined;
+
   const openFolder = async () => {
     try {
       const selected = await invoke<string | string[] | null>("plugin:dialog|open", {
@@ -70,8 +72,32 @@ const Sidebar: Component = () => {
     sidebarStore.setPanelWidth(ratio * parentWidth);
   };
 
+  onMount(() => {
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!sidebarStore.isPanelOpen) {
+        return;
+      }
+
+      const target = event.target;
+      if (!(target instanceof Node)) {
+        return;
+      }
+
+      if (sidebarRef?.contains(target)) {
+        return;
+      }
+
+      sidebarStore.closePanel();
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    onCleanup(() => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+    });
+  });
+
   return (
-    <div class="forge-sidebar" data-testid="sidebar">
+    <div ref={sidebarRef} class="forge-sidebar" data-testid="sidebar">
       <NavRail />
 
       <Show when={sidebarStore.isPanelOpen}>
