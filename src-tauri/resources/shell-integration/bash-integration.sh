@@ -33,6 +33,8 @@ __forge_osc133_precmd() {
   fi
 
   __forge_osc133_emit "A"
+
+  PS1="\W \[\033[1;35m\]❯\[\033[0m\] "
 }
 
 trap '__forge_osc133_preexec' DEBUG

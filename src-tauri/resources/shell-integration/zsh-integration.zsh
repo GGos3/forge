@@ -19,6 +19,8 @@ __forge_osc133_precmd() {
   fi
 
   __forge_osc133_emit "A"
+
+  PROMPT="%1~ %B%F{magenta}❯%f%b "
 }
 
 autoload -Uz add-zsh-hook
