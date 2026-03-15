@@ -133,4 +133,32 @@ describe("pane store", () => {
       expect(resized.root.ratio).toBe(0.9);
     }
   });
+
+  it("splitPaneAt with 'after' creates split with new pane in second", async () => {
+    const tab = activeTabOrThrow();
+    const targetId = tab.activePane;
+    const createdPaneId = await paneStore.splitPaneAt(targetId, "vertical", "after");
+
+    const updated = activeTabOrThrow();
+    expect(createdPaneId).toBeTruthy();
+    expect(updated.root.type).toBe("split");
+    if (updated.root.type !== "split") return;
+    expect(updated.root.first.type).toBe("terminal");
+    expect(updated.root.second.id).toBe(createdPaneId);
+    expect(updated.activePane).toBe(createdPaneId);
+  });
+
+  it("splitPaneAt with 'before' creates split with new pane in first", async () => {
+    const tab = activeTabOrThrow();
+    const targetId = tab.activePane;
+    const createdPaneId = await paneStore.splitPaneAt(targetId, "horizontal", "before");
+
+    const updated = activeTabOrThrow();
+    expect(createdPaneId).toBeTruthy();
+    expect(updated.root.type).toBe("split");
+    if (updated.root.type !== "split") return;
+    expect(updated.root.first.id).toBe(createdPaneId);
+    expect(updated.root.second.type).toBe("terminal");
+    expect(updated.activePane).toBe(createdPaneId);
+  });
 });

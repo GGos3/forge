@@ -6,10 +6,11 @@ import {
   getAllTerminalPanes,
   resizePane,
   splitPane,
+  splitPaneAt as splitPaneAtModel,
 } from "../models/pane-tree";
 import { sessionStore } from "./session";
 import { tabStore } from "./tab";
-import type { PaneId, PaneNode, SplitDirection } from "../types/pane";
+import type { PaneId, PaneNode, SplitDirection, SplitPosition } from "../types/pane";
 import type { SessionId } from "../types/session";
 
 type FocusDirection = "up" | "down" | "left" | "right";
@@ -59,6 +60,36 @@ export const paneStore = {
 
     const beforeIds = new Set(getAllTerminalPanes(activeTab.root).map((pane) => pane.id));
     const nextTree = splitPane(activeTab.root, activeTab.activePane, direction);
+    if (nextTree === activeTab.root) {
+      return null;
+    }
+
+    const insertedPane = getAllTerminalPanes(nextTree).find((pane) => !beforeIds.has(pane.id));
+    if (!insertedPane || insertedPane.type !== "terminal") {
+      tabStore.setTabPaneTree(activeTab.id, nextTree, activeTab.activePane);
+      return null;
+    }
+
+    tabStore.setTabPaneTree(activeTab.id, nextTree, insertedPane.id);
+    return insertedPane.id;
+  },
+
+  async splitPaneAt(
+    targetPaneId: PaneId,
+    direction: SplitDirection,
+    position: SplitPosition,
+  ): Promise<PaneId | null> {
+    const activeTab = tabStore.activeTab;
+    if (!activeTab) {
+      return null;
+    }
+
+    if (!findPane(activeTab.root, targetPaneId)) {
+      return null;
+    }
+
+    const beforeIds = new Set(getAllTerminalPanes(activeTab.root).map((pane) => pane.id));
+    const nextTree = splitPaneAtModel(activeTab.root, targetPaneId, direction, position);
     if (nextTree === activeTab.root) {
       return null;
     }
