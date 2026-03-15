@@ -366,9 +366,54 @@ describe("Terminal", () => {
     });
   });
 
-  it("accounts for wrapped xterm rows when mapping later blocks", async () => {
+  it("waits for the previous write before anchoring the second command", async () => {
     const { container } = render(() =>
       createComponent(Terminal, { sessionId: { value: "session-7" } as SessionId, focused: false })
+    );
+
+    await waitFor(() => expect(mockState.terminalInstances).toHaveLength(1));
+
+    const terminal = mockState.terminalInstances[0];
+    let firstWriteDone: (() => void) | undefined;
+    terminal.buffer.active.cursorY = 0;
+    terminal.write.mockImplementationOnce((_: Uint8Array, callback?: () => void) => {
+      firstWriteDone = () => {
+        terminal.buffer.active.cursorY = 3;
+        callback?.();
+      };
+    });
+
+    mockState.sessionOutputHandler?.({
+      payload: {
+        session_id: "session-7",
+        data: Array.from(new TextEncoder().encode("\u001b]133;A\u0007\u001b]133;B\u0007ls\n\u001b]133;C\u0007a\nb\n\u001b]133;D;0\u0007")),
+      },
+    });
+
+    terminal.write.mockImplementationOnce((_: Uint8Array, callback?: () => void) => {
+      terminal.buffer.active.cursorY = 4;
+      callback?.();
+    });
+    mockState.sessionOutputHandler?.({
+      payload: {
+        session_id: "session-7",
+        data: Array.from(new TextEncoder().encode("\u001b]133;A\u0007prompt ❯ ls\u001b]133;B;ls\u0007")),
+      },
+    });
+
+    expect(terminal.write).toHaveBeenCalledTimes(1);
+    firstWriteDone?.();
+
+    await waitFor(() => {
+      const blocks = Array.from(container.querySelectorAll(".forge-block-card")) as HTMLElement[];
+      expect(blocks).toHaveLength(2);
+      expect(blocks[1]?.style.top).toBe("51px");
+    });
+  });
+
+  it("accounts for wrapped xterm rows when mapping later blocks", async () => {
+    const { container } = render(() =>
+      createComponent(Terminal, { sessionId: { value: "session-8" } as SessionId, focused: false })
     );
 
     await waitFor(() => expect(mockState.terminalInstances).toHaveLength(1));
@@ -387,7 +432,7 @@ describe("Terminal", () => {
       "\u001b]133;A\u0007\u001b]133;B\u0007echo one\n\u001b]133;C\u0007one\n\u001b]133;D;0\u0007\u001b]133;A\u0007\u001b]133;B\u0007echo two\n\u001b]133;C\u0007two\n\u001b]133;D;0\u0007"
     );
     mockState.sessionOutputHandler?.({
-      payload: { session_id: "session-7", data: Array.from(output) },
+      payload: { session_id: "session-8", data: Array.from(output) },
     });
 
     await waitFor(() => {

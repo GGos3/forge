@@ -131,6 +131,8 @@ export default function Terminal(props: TerminalProps) {
     let outputUnlisten: (() => void) | undefined;
     let exitUnlisten: (() => void) | undefined;
     let resizeObserver: ResizeObserver | undefined;
+    let writingOutput = false;
+    const pendingOutputEvents: Uint8Array[] = [];
 
     const blockParser = new BlockParser();
     const blockStartRows = new Map<string, number>();
@@ -285,12 +287,17 @@ export default function Terminal(props: TerminalProps) {
     xterm.onRender(() => updateBlocksUI());
     xterm.onScroll(() => updateBlocksUI());
 
-    void listen<SessionOutputEvent>("session-output", (event) => {
-      if (event.payload.session_id !== sessionValue) {
+    const flushOutputQueue = () => {
+      if (writingOutput || pendingOutputEvents.length === 0) {
         return;
       }
 
-      const rawBytes = new Uint8Array(event.payload.data);
+      const rawBytes = pendingOutputEvents.shift();
+      if (!rawBytes) {
+        return;
+      }
+
+      writingOutput = true;
       const str = textDecoder.decode(rawBytes);
       const preWriteRow = cursorRow();
       const preFeedLine = blockParser.getLineNumber();
@@ -304,7 +311,7 @@ export default function Terminal(props: TerminalProps) {
       const snapshotCurrent = blockParser.getCurrentBlock();
       const snapshotAll = [...snapshotBlocks, ...(snapshotCurrent ? [snapshotCurrent] : [])];
 
-      xterm.write(new Uint8Array(event.payload.data), () => {
+      xterm.write(rawBytes, () => {
         const rowForParserLine = (line: number) => {
           const logicalOffset = line - preFeedLine;
           if (logicalOffset === 0) {
@@ -347,7 +354,18 @@ export default function Terminal(props: TerminalProps) {
         }
 
         updateBlocksUI();
+        writingOutput = false;
+        flushOutputQueue();
       });
+    };
+
+    void listen<SessionOutputEvent>("session-output", (event) => {
+      if (event.payload.session_id !== sessionValue) {
+        return;
+      }
+
+      pendingOutputEvents.push(new Uint8Array(event.payload.data));
+      flushOutputQueue();
     }).then((unlisten) => {
       if (disposed) {
         unlisten();
