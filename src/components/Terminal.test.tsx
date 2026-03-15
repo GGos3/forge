@@ -271,4 +271,30 @@ describe("Terminal", () => {
 
     await waitFor(() => expect(terminal.focus).toHaveBeenCalled());
   });
+
+  it("anchors new OSC blocks to the pre-write cursor row", async () => {
+    const { container } = render(() =>
+      createComponent(Terminal, { sessionId: { value: "session-4" } as SessionId, focused: false })
+    );
+
+    await waitFor(() => expect(mockState.terminalInstances).toHaveLength(1));
+
+    const terminal = mockState.terminalInstances[0];
+    terminal.buffer.active.cursorY = 0;
+    terminal.write.mockImplementation((_: Uint8Array, callback?: () => void) => {
+      terminal.buffer.active.cursorY = 1;
+      callback?.();
+    });
+
+    const output = new TextEncoder().encode("\u001b]133;A\u0007\u001b]133;B;echo inline\u0007");
+    mockState.sessionOutputHandler?.({
+      payload: { session_id: "session-4", data: Array.from(output) },
+    });
+
+    await waitFor(() => {
+      const block = container.querySelector(".forge-block-card") as HTMLElement | null;
+      expect(block).not.toBeNull();
+      expect(block?.style.top).toBe("0px");
+    });
+  });
 });
