@@ -21,6 +21,8 @@ interface MockTerminal {
   onScroll: ReturnType<typeof vi.fn>;
   onKey: ReturnType<typeof vi.fn>;
   registerMarker: ReturnType<typeof vi.fn>;
+  attachCustomKeyEventHandler: ReturnType<typeof vi.fn>;
+  hasSelection: ReturnType<typeof vi.fn>;
   buffer: any;
   element: any;
 }
@@ -93,6 +95,8 @@ vi.mock("@xterm/xterm", () => ({
     onScroll = vi.fn();
     onKey = vi.fn();
     registerMarker = vi.fn();
+    attachCustomKeyEventHandler = vi.fn();
+    hasSelection = vi.fn(() => false);
     lines: MockBufferLine[] = Array.from({ length: 200 }, () => ({ isWrapped: false }));
     buffer = {
       active: {

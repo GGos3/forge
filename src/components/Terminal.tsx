@@ -26,66 +26,57 @@ function getSessionValue(sessionId: SessionId | string): string {
 export default function Terminal(props: TerminalProps) {
   let containerRef: HTMLDivElement | undefined;
   let terminal: XTerm | null = null;
-  let lastPointerTargetValue = "none";
-  let lastInputValue = "";
-  let lastWriteStatusValue = "idle";
-  let lastOutputBytesValue = 0;
-  let lastRawHexValue = "";
-  let hasSeenOsc133 = false;
 
-  const currentTerminalTheme = () => ({
-    background: getComputedStyle(document.documentElement).getPropertyValue("--surface-1").trim() || "#1e1e2e",
-    foreground: getComputedStyle(document.documentElement).getPropertyValue("--text-primary").trim() || "#e0e0e6",
-    cursor: getComputedStyle(document.documentElement).getPropertyValue("--text-primary").trim() || "#e0e0e6",
-    selectionBackground: getComputedStyle(document.documentElement).getPropertyValue("--terminal-selection").trim() || "rgba(124, 91, 245, 0.3)",
-    selectionInactiveBackground: getComputedStyle(document.documentElement).getPropertyValue("--terminal-selection-inactive").trim() || "rgba(124, 91, 245, 0.1)",
-  });
+  const currentTerminalTheme = () => {
+    const css = (v: string) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+    return {
+      background: css("--surface-1") || "#16161e",
+      foreground: css("--text-primary") || "#e1e1e6",
+      cursor: css("--accent") || "#7c5bf5",
+      cursorAccent: css("--surface-1") || "#16161e",
+      selectionBackground: css("--terminal-selection") || "rgba(124, 91, 245, 0.3)",
+      selectionInactiveBackground: css("--terminal-selection-inactive") || "rgba(124, 91, 245, 0.1)",
+      black: "#414868",
+      red: "#f7768e",
+      green: "#73c991",
+      yellow: "#e0af68",
+      blue: "#7aa2f7",
+      magenta: "#bb9af7",
+      cyan: "#7dcfff",
+      white: "#c0caf5",
+      brightBlack: "#565f89",
+      brightRed: "#f7768e",
+      brightGreen: "#9ece6a",
+      brightYellow: "#e0af68",
+      brightBlue: "#7aa2f7",
+      brightMagenta: "#bb9af7",
+      brightCyan: "#7dcfff",
+      brightWhite: "#e1e1e6",
+    };
+  };
   
   const [blocks, setBlocks] = createSignal<BlockUiItem[]>([]);
-  const [debugState, setDebugState] = createSignal({
-    textareaPresent: false,
-    helperTextareaPresent: false,
-    activeTag: "none",
-    activeClass: "",
-    lastPointerTarget: "none",
-    lastInput: "",
-    lastWriteStatus: "idle",
-    lastOutputBytes: 0,
-    lastRawHex: "",
-  });
+  const [hoveredBlock, setHoveredBlock] = createSignal<{
+    blockId: string;
+    region: "input" | "output";
+    block: BlockUiItem;
+  } | null>(null);
 
-  const syncDebugState = (nextPointerTarget?: string, nextInput?: string, nextWriteStatus?: string, nextOutputBytes?: number) => {
-    if (nextPointerTarget !== undefined) {
-      lastPointerTargetValue = nextPointerTarget;
+  const handleRegionHover = (
+    blockId: string | null,
+    region: "input" | "output" | null,
+    block: BlockUiItem | null,
+  ) => {
+    if (blockId && region && block) {
+      setHoveredBlock({ blockId, region, block });
+    } else {
+      setHoveredBlock(null);
     }
-    if (nextInput !== undefined) {
-      lastInputValue = nextInput;
-    }
-    if (nextWriteStatus !== undefined) {
-      lastWriteStatusValue = nextWriteStatus;
-    }
-    if (nextOutputBytes !== undefined) {
-      lastOutputBytesValue = nextOutputBytes;
-    }
-
-     const activeElement = document.activeElement as HTMLElement | null;
-    setDebugState({
-      textareaPresent: Boolean(containerRef?.querySelector("textarea")),
-      helperTextareaPresent: Boolean(containerRef?.querySelector(".xterm-helper-textarea")),
-      activeTag: activeElement?.tagName ?? "none",
-      activeClass: activeElement?.className ?? "",
-      lastPointerTarget: lastPointerTargetValue,
-      lastInput: lastInputValue,
-      lastWriteStatus: lastWriteStatusValue,
-      lastOutputBytes: lastOutputBytesValue,
-      lastRawHex: lastRawHexValue,
-    });
   };
 
   const focusNativeTerminalInput = () => {
     const textarea = containerRef?.querySelector("textarea") as HTMLTextAreaElement | null | undefined;
     textarea?.focus({ preventScroll: true });
-    syncDebugState();
   };
 
   const sendInputToSession = async (sessionValue: string, data: string) => {
@@ -93,16 +84,13 @@ export default function Terminal(props: TerminalProps) {
       return;
     }
 
-    syncDebugState(undefined, JSON.stringify(data), "pending");
-
     try {
       await invoke("write_to_session", {
         sessionId: sessionValue,
         data: Array.from(textEncoder.encode(data)),
       });
-      syncDebugState(undefined, undefined, "ok");
-    } catch (error) {
-      syncDebugState(undefined, undefined, `error: ${error instanceof Error ? error.message : String(error)}`);
+    } catch {
+      void 0;
     }
   };
 
@@ -131,6 +119,7 @@ export default function Terminal(props: TerminalProps) {
 
     const blockParser = new BlockParser();
     const blockStartRows = new Map<string, number>();
+    const blockOutputStartRows = new Map<string, number>();
 
     const cursorRow = () => terminal!.buffer.active.baseY + terminal!.buffer.active.cursorY;
 
@@ -160,10 +149,15 @@ export default function Terminal(props: TerminalProps) {
         const relativeEndRow = endRow - viewportY;
         const height = (relativeEndRow - relativeRow) * cellHeight;
 
+        const outputStartRow = blockOutputStartRows.get(b.id) ?? startRow + 1;
+        const inputRows = Math.max(1, outputStartRow - startRow);
+        const inputHeight = inputRows * cellHeight;
+
         uiItems.push({
           id: b.id,
           top,
           height: Math.max(height, cellHeight),
+          inputHeight: Math.min(inputHeight, Math.max(height, cellHeight)),
           command: b.command,
           output: b.output,
           exitCode: b.exitCode,
@@ -204,18 +198,36 @@ export default function Terminal(props: TerminalProps) {
       } catch {}
     }
 
+    xterm.attachCustomKeyEventHandler((event: KeyboardEvent) => {
+      if (event.type !== "keydown") return true;
+      if (event.key !== "c" || !(event.metaKey || event.ctrlKey)) return true;
+      if (xterm.hasSelection()) return true;
+
+      const hovered = hoveredBlock();
+      if (!hovered) return true;
+
+      const textToCopy = hovered.region === "input"
+        ? hovered.block.command
+        : hovered.block.output;
+
+      if (textToCopy) {
+        void navigator.clipboard.writeText(textToCopy);
+        return false;
+      }
+
+      return true;
+    });
+
     const focusTerminal = () => {
       focusNativeTerminalInput();
       xterm.focus();
-      queueMicrotask(() => syncDebugState());
     };
 
     if (props.focused) {
       focusTerminal();
     }
 
-    const handlePointerDown = (event: PointerEvent) => {
-      syncDebugState((event.target as HTMLElement | null)?.className ?? "unknown");
+    const handlePointerDown = () => {
       focusTerminal();
     };
 
@@ -249,14 +261,6 @@ export default function Terminal(props: TerminalProps) {
       void sendInputToSession(sessionValue, data);
     });
 
-    xterm.onKey(({ domEvent }) => {
-      if (platform !== "macos") {
-        return;
-      }
-
-      syncDebugState(undefined, `key:${domEvent.key}`);
-    });
-
     xterm.onRender(() => updateBlocksUI());
     xterm.onScroll(() => updateBlocksUI());
 
@@ -267,20 +271,21 @@ export default function Terminal(props: TerminalProps) {
 
       const rawBytes = new Uint8Array(event.payload.data);
       const str = textDecoder.decode(rawBytes);
-      if (str.includes("\x1b]133;")) {
-        hasSeenOsc133 = true;
-      }
-      lastRawHexValue = (hasSeenOsc133 ? "OSC133=YES " : "OSC133=NO ") + Array.from(rawBytes.slice(0, 80)).map(b => b.toString(16).padStart(2, "0")).join(" ");
       const preWriteRow = cursorRow();
       const prevBlockId = blockParser.getCurrentBlock()?.id;
       blockParser.feed(str);
       const newBlockId = blockParser.getCurrentBlock()?.id;
 
       xterm.write(new Uint8Array(event.payload.data), () => {
-        syncDebugState(undefined, undefined, undefined, event.payload.data.length);
-
         if (newBlockId && newBlockId !== prevBlockId && !blockStartRows.has(newBlockId)) {
           blockStartRows.set(newBlockId, Math.max(0, preWriteRow - 1));
+        }
+
+        const currentParsedBlock = blockParser.getCurrentBlock();
+        if (currentParsedBlock && !blockOutputStartRows.has(currentParsedBlock.id) && currentParsedBlock.outputStartLine > currentParsedBlock.startLine) {
+          const blockStart = blockStartRows.get(currentParsedBlock.id) ?? 0;
+          const outputOffset = currentParsedBlock.outputStartLine - currentParsedBlock.startLine;
+          blockOutputStartRows.set(currentParsedBlock.id, blockStart + outputOffset);
         }
 
         updateBlocksUI();
@@ -320,7 +325,6 @@ export default function Terminal(props: TerminalProps) {
     }
 
     queueMicrotask(() => {
-      syncDebugState();
       void syncSize();
     });
 
@@ -342,7 +346,6 @@ export default function Terminal(props: TerminalProps) {
     if (props.focused) {
       focusNativeTerminalInput();
       terminal?.focus();
-      queueMicrotask(() => syncDebugState());
     }
   });
 
@@ -371,22 +374,10 @@ export default function Terminal(props: TerminalProps) {
       onPointerDown={() => {
         focusNativeTerminalInput();
         terminal?.focus();
-        queueMicrotask(() => syncDebugState("terminal-focus-host"));
       }}
     >
       <div ref={containerRef} class="forge-terminal-surface" data-testid="terminal-surface" style={{ "-webkit-app-region": "no-drag" }} />
-      <BlockOverlay blocks={blocks()} />
-      <div class="forge-terminal-debug" data-testid="terminal-debug-state">
-        <div>textarea: {debugState().textareaPresent ? "yes" : "no"}</div>
-        <div>helper: {debugState().helperTextareaPresent ? "yes" : "no"}</div>
-        <div>activeTag: {debugState().activeTag}</div>
-        <div>activeClass: {debugState().activeClass || "(empty)"}</div>
-        <div>lastPointer: {debugState().lastPointerTarget || "(none)"}</div>
-        <div>lastInput: {debugState().lastInput || "(none)"}</div>
-        <div>writeStatus: {debugState().lastWriteStatus}</div>
-        <div>lastOutputBytes: {debugState().lastOutputBytes}</div>
-        <div style={{ "font-size": "9px", "word-break": "break-all" }}>rawHex: {debugState().lastRawHex || "(none)"}</div>
-      </div>
+      <BlockOverlay blocks={blocks()} onRegionHover={handleRegionHover} />
     </div>
   );
 }
