@@ -149,10 +149,8 @@ export default function Terminal(props: TerminalProps) {
       const cellHeight = getCellHeight(terminal);
       if (cellHeight === 0 || Number.isNaN(cellHeight)) return;
 
-      const xtermScreen = terminal.element?.querySelector('.xterm-screen');
-      const rowsOffsetY = xtermScreen && containerRef
-        ? xtermScreen.getBoundingClientRect().top - containerRef.getBoundingClientRect().top
-        : 0;
+      const xtermRowEls = terminal.element?.querySelector('.xterm-rows')?.children;
+      const containerTop = containerRef?.getBoundingClientRect().top ?? 0;
 
       const uiItems: BlockUiItem[] = [];
 
@@ -164,10 +162,13 @@ export default function Terminal(props: TerminalProps) {
           ? Math.max(startRow + 1, blockStartRows.get(nextBlock.id)!)
           : Math.max(startRow + 1, cursorRow());
 
-        const relativeRow = startRow - viewportY;
-        const top = relativeRow * cellHeight + rowsOffsetY;
+        const relIdx = startRow - viewportY;
+        const rowEl = xtermRowEls?.[relIdx] as HTMLElement | undefined;
+        const top = rowEl
+          ? rowEl.getBoundingClientRect().top - containerTop
+          : relIdx * cellHeight;
         const relativeEndRow = endRow - viewportY;
-        const height = (relativeEndRow - relativeRow) * cellHeight;
+        const height = (relativeEndRow - relIdx) * cellHeight;
 
         const outputStartRow = blockOutputStartRows.get(b.id) ?? startRow + 1;
         const inputRows = Math.max(1, outputStartRow - startRow);
