@@ -14,6 +14,7 @@ export interface BlockUiItem {
 }
 
 const BLOCK_HEADER_HEIGHT = 28;
+const BLOCK_GAP = 4;
 
 interface BlockOverlayProps {
   blocks: BlockUiItem[];
@@ -35,10 +36,13 @@ function hitTestBlocks(
   mouseY: number,
   blocks: BlockUiItem[],
 ): { block: BlockUiItem; region: "input" | "output" } | null {
-  for (const b of blocks) {
+  for (let i = blocks.length - 1; i >= 0; i--) {
+    const b = blocks[i]!;
     if (mouseY >= b.top && mouseY < b.top + b.height) {
       const localY = mouseY - b.top;
-      const region: "input" | "output" = localY < b.inputHeight ? "input" : "output";
+      const headerHeight = Math.min(BLOCK_HEADER_HEIGHT, b.height);
+      const inputBoundary = headerHeight + b.inputHeight;
+      const region: "input" | "output" = localY < inputBoundary ? "input" : "output";
       return { block: b, region };
     }
   }
@@ -116,7 +120,7 @@ export default function BlockOverlay(props: BlockOverlayProps) {
                 }}
                 style={{
                   top: `${block.top}px`,
-                  height: `${block.height}px`,
+                  height: `${Math.max(0, block.height - BLOCK_GAP)}px`,
                 }}
                 data-testid={`block-${block.id}`}
               >

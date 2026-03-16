@@ -14,8 +14,8 @@
   left: 0;
   right: 0;
   pointer-events: none;
-  border-radius: 0;
-  border: none;
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--block-divider) 35%, transparent);
   border-bottom: 1px solid var(--block-divider);
   background: none;
   transition: background-color var(--duration-fast) var(--ease-default),
@@ -81,6 +81,7 @@
   right: 0;
   pointer-events: none;
   z-index: 2;
+  border-bottom: 1px solid color-mix(in srgb, var(--block-divider) 30%, transparent);
 }
 
 .forge-block-header--visible {
