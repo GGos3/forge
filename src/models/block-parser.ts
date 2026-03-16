@@ -155,6 +155,20 @@ export class BlockParser {
 
     if (marker === "B") {
       const inlineCommand = parts.slice(2).join(";").trim();
+      console.log("[OSC_B]", {
+        marker,
+        lineNumber: this.lineNumber,
+        inlineCommand,
+        state: this.state,
+        currentBlock: this.currentBlock
+          ? {
+              id: this.currentBlock.id,
+              command: this.currentBlock.command,
+              startLine: this.currentBlock.startLine,
+              outputStartLine: this.currentBlock.outputStartLine,
+            }
+          : null,
+      });
       if (isInternalOscCommand(inlineCommand)) {
         this.ignoringOscCommand = true;
         this.state = "idle";
@@ -185,6 +199,19 @@ export class BlockParser {
     }
 
     if (marker === "C") {
+      console.log("[OSC_C]", {
+        marker,
+        lineNumber: this.lineNumber,
+        state: this.state,
+        currentBlock: this.currentBlock
+          ? {
+              id: this.currentBlock.id,
+              command: this.currentBlock.command,
+              startLine: this.currentBlock.startLine,
+              outputStartLine: this.currentBlock.outputStartLine,
+            }
+          : null,
+      });
       if (this.ignoringOscCommand) {
         return;
       }

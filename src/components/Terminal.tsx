@@ -141,8 +141,8 @@ export default function Terminal(props: TerminalProps) {
 
     const cursorRow = () => terminal!.buffer.active.baseY + terminal!.buffer.active.cursorY;
 
-    const updateBlocksUI = () => {
-      if (!terminal) return;
+      const updateBlocksUI = () => {
+        if (!terminal) return;
       
       const allBlocks = blockParser.getBlocks();
       const currentBlock = blockParser.getCurrentBlock();
@@ -157,9 +157,9 @@ export default function Terminal(props: TerminalProps) {
 
       const uiItems: BlockUiItem[] = [];
 
-      for (let i = 0; i < blocksToRender.length; i++) {
-        const b = blocksToRender[i];
-        const nextBlock = blocksToRender[i + 1];
+        for (let i = 0; i < blocksToRender.length; i++) {
+          const b = blocksToRender[i];
+          const nextBlock = blocksToRender[i + 1];
         const startRow = blockStartRows.get(b.id) ?? 0;
         const endRow = nextBlock && blockStartRows.has(nextBlock.id)
           ? Math.max(startRow + 1, blockStartRows.get(nextBlock.id)!)
@@ -173,12 +173,29 @@ export default function Terminal(props: TerminalProps) {
         const relativeEndRow = endRow - viewportY;
         const height = (relativeEndRow - relIdx) * cellHeight;
 
-        const outputStartRow = blockOutputStartRows.get(b.id) ?? startRow + 1;
-        const inputRows = Math.max(1, outputStartRow - startRow);
-        const inputHeight = inputRows * cellHeight;
+          const outputStartRow = blockOutputStartRows.get(b.id) ?? startRow + 1;
+          const inputRows = Math.max(1, outputStartRow - startRow);
+          const inputHeight = inputRows * cellHeight;
 
-        uiItems.push({
-          id: b.id,
+          console.log("[UI]", {
+            id: b.id,
+            command: b.command,
+            startLine: b.startLine,
+            outputStartLine: b.outputStartLine,
+            startRow,
+            endRow,
+            outputStartRow,
+            viewportY,
+            relIdx,
+            rowElTop: rowEl?.getBoundingClientRect().top ?? null,
+            containerTop,
+            finalTop: top,
+            height,
+            inputHeight,
+          });
+
+          uiItems.push({
+            id: b.id,
           top,
           height: Math.max(height, cellHeight),
           inputHeight: Math.min(inputHeight, Math.max(height, cellHeight)),
@@ -318,6 +335,20 @@ export default function Terminal(props: TerminalProps) {
       const snapshotCurrent = blockParser.getCurrentBlock();
       const snapshotAll = [...snapshotBlocks, ...(snapshotCurrent ? [snapshotCurrent] : [])];
 
+      console.log("[QUEUE]", {
+        str,
+        preWriteRow,
+        preFeedLine,
+        blocks: snapshotAll.map((b) => ({
+          id: b.id,
+          command: b.command,
+          startLine: b.startLine,
+          outputStartLine: b.outputStartLine,
+          cachedStartRow: blockStartRows.get(b.id) ?? null,
+          cachedOutputRow: blockOutputStartRows.get(b.id) ?? null,
+        })),
+      });
+
       xterm.write(rawBytes, () => {
         const rowForParserLine = (line: number) => {
           const logicalOffset = line - preFeedLine;
@@ -350,6 +381,14 @@ export default function Terminal(props: TerminalProps) {
 
         for (const b of snapshotAll) {
           const nextStartRow = rowForParserLine(b.startLine);
+          console.log("[ROW_MAP]", {
+            id: b.id,
+            command: b.command,
+            startLine: b.startLine,
+            outputStartLine: b.outputStartLine,
+            nextStartRow,
+            previousStartRow: blockStartRows.get(b.id) ?? null,
+          });
           if (blockStartRows.get(b.id) !== nextStartRow) {
             blockStartRows.set(b.id, nextStartRow);
           }
@@ -357,9 +396,24 @@ export default function Terminal(props: TerminalProps) {
 
         for (const b of snapshotAll) {
           if (!blockOutputStartRows.has(b.id) && b.outputStartLine > b.startLine) {
-            blockOutputStartRows.set(b.id, rowForParserLine(b.outputStartLine));
+            const nextOutputStartRow = rowForParserLine(b.outputStartLine);
+            console.log("[ROW_MAP_OUTPUT]", {
+              id: b.id,
+              command: b.command,
+              outputStartLine: b.outputStartLine,
+              nextOutputStartRow,
+              previousOutputStartRow: blockOutputStartRows.get(b.id) ?? null,
+            });
+            blockOutputStartRows.set(b.id, nextOutputStartRow);
           } else if (b.outputStartLine > b.startLine) {
             const nextOutputStartRow = rowForParserLine(b.outputStartLine);
+            console.log("[ROW_MAP_OUTPUT]", {
+              id: b.id,
+              command: b.command,
+              outputStartLine: b.outputStartLine,
+              nextOutputStartRow,
+              previousOutputStartRow: blockOutputStartRows.get(b.id) ?? null,
+            });
             if (blockOutputStartRows.get(b.id) !== nextOutputStartRow) {
               blockOutputStartRows.set(b.id, nextOutputStartRow);
             }
