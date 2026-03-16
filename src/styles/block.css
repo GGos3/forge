@@ -74,12 +74,27 @@
   pointer-events: none;
 }
 
+.forge-block-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.forge-block-header--visible {
+  background: color-mix(in srgb, var(--surface-2) 92%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--block-divider) 80%, transparent);
+}
+
 .forge-block-toolbar {
   pointer-events: none;
   position: absolute;
-  top: var(--space-2);
-  left: var(--space-4);
-  right: auto;
+  top: 50%;
+  left: var(--space-3);
+  right: var(--space-3);
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   gap: 0;
@@ -89,9 +104,8 @@
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--border-subtle);
-  max-width: 70%;
+  max-width: none;
   opacity: 0;
-  z-index: 2;
   transition: opacity var(--duration-fast) var(--ease-default);
 }
 

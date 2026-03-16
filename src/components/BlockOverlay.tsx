@@ -13,6 +13,8 @@ export interface BlockUiItem {
   isRunning: boolean;
 }
 
+const BLOCK_HEADER_HEIGHT = 28;
+
 interface BlockOverlayProps {
   blocks: BlockUiItem[];
   onRegionHover?: (blockId: string | null, region: "input" | "output" | null, block: BlockUiItem | null) => void;
@@ -96,7 +98,11 @@ export default function BlockOverlay(props: BlockOverlayProps) {
           const isHovered = () => hoveredBlockId() === block.id;
           const isInputHovered = () => isHovered() && hoveredRegion() === "input";
           const isOutputHovered = () => isHovered() && hoveredRegion() === "output";
-          const outputHeight = () => Math.max(0, block.height - block.inputHeight);
+          const headerHeight = () => Math.min(BLOCK_HEADER_HEIGHT, block.height);
+          const contentTop = () => headerHeight();
+          const contentHeight = () => Math.max(0, block.height - headerHeight());
+          const inputHeight = () => Math.max(0, Math.min(block.inputHeight, contentHeight()));
+          const outputHeight = () => Math.max(0, contentHeight() - inputHeight());
 
           return (
             <Show when={block.top > -block.height && block.top < 2000}>
@@ -114,60 +120,62 @@ export default function BlockOverlay(props: BlockOverlayProps) {
                 }}
                 data-testid={`block-${block.id}`}
               >
+                <div class="forge-block-header" classList={{ "forge-block-header--visible": isHovered() }} style={{ height: `${headerHeight()}px` }}>
+                  <div class="forge-block-toolbar" classList={{ "forge-block-toolbar--visible": isHovered() }}>
+                    <div class="forge-block-toolbar__info">
+                      <div class="forge-block-card__status">
+                        <Show when={blockStatus(block) === "success"}>
+                          <svg class="forge-block-card__icon forge-block-card__icon--success" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" data-testid="status-success">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        </Show>
+                        <Show when={blockStatus(block) === "error"}>
+                          <svg class="forge-block-card__icon forge-block-card__icon--error" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" data-testid="status-error">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                          </svg>
+                        </Show>
+                        <Show when={blockStatus(block) === "running"}>
+                          <div class="forge-block-card__spinner" data-testid="running-indicator" />
+                        </Show>
+                      </div>
+
+                      <span class="forge-block-card__command" title={block.command}>
+                        {block.command || "Command"}
+                      </span>
+
+                      <span class="forge-block-card__time">
+                        {formatTimestamp(block.timestamp)}
+                      </span>
+
+                      <Show when={blockStatus(block) === "error" && block.exitCode !== null}>
+                        <span class="forge-block-card__exit-code" data-testid="exit-code">
+                          exit {block.exitCode}
+                        </span>
+                      </Show>
+                    </div>
+
+                    <div class="forge-block-toolbar__divider" />
+
+                    <BlockActions command={block.command} output={block.output} isVisible={isHovered()} />
+                  </div>
+                </div>
+
                 <div
                   class="forge-block-region forge-block-region--input"
                   classList={{ "forge-block-region--active": isInputHovered() }}
-                  style={{ height: `${block.inputHeight}px` }}
+                  style={{ top: `${contentTop()}px`, height: `${inputHeight()}px` }}
                 />
 
                 <div
                   class="forge-block-region forge-block-region--output"
                   classList={{ "forge-block-region--active": isOutputHovered() }}
-                  style={{ height: `${outputHeight()}px`, top: `${block.inputHeight}px` }}
+                  style={{ height: `${outputHeight()}px`, top: `${contentTop() + inputHeight()}px` }}
                 />
 
-                <Show when={isHovered()}>
-                  <div class="forge-block-region-divider" style={{ top: `${block.inputHeight}px` }} />
+                <Show when={isHovered() && outputHeight() > 0}>
+                  <div class="forge-block-region-divider" style={{ top: `${contentTop() + inputHeight()}px` }} />
                 </Show>
-
-                <div class="forge-block-toolbar" classList={{ "forge-block-toolbar--visible": isHovered() }}>
-                  <div class="forge-block-toolbar__info">
-                    <div class="forge-block-card__status">
-                      <Show when={blockStatus(block) === "success"}>
-                        <svg class="forge-block-card__icon forge-block-card__icon--success" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" data-testid="status-success">
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                      </Show>
-                      <Show when={blockStatus(block) === "error"}>
-                        <svg class="forge-block-card__icon forge-block-card__icon--error" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" data-testid="status-error">
-                          <line x1="18" y1="6" x2="6" y2="18" />
-                          <line x1="6" y1="6" x2="18" y2="18" />
-                        </svg>
-                      </Show>
-                      <Show when={blockStatus(block) === "running"}>
-                        <div class="forge-block-card__spinner" data-testid="running-indicator" />
-                      </Show>
-                    </div>
-
-                    <span class="forge-block-card__command" title={block.command}>
-                      {block.command || "Command"}
-                    </span>
-
-                    <span class="forge-block-card__time">
-                      {formatTimestamp(block.timestamp)}
-                    </span>
-
-                    <Show when={blockStatus(block) === "error" && block.exitCode !== null}>
-                      <span class="forge-block-card__exit-code" data-testid="exit-code">
-                        exit {block.exitCode}
-                      </span>
-                    </Show>
-                  </div>
-
-                  <div class="forge-block-toolbar__divider" />
-
-                  <BlockActions command={block.command} output={block.output} isVisible={isHovered()} />
-                </div>
               </div>
             </Show>
           );
