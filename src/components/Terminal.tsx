@@ -349,14 +349,20 @@ export default function Terminal(props: TerminalProps) {
         };
 
         for (const b of snapshotAll) {
-          if (!prevBlockIds.has(b.id) && !blockStartRows.has(b.id)) {
-            blockStartRows.set(b.id, rowForParserLine(b.startLine));
+          const nextStartRow = rowForParserLine(b.startLine);
+          if (blockStartRows.get(b.id) !== nextStartRow) {
+            blockStartRows.set(b.id, nextStartRow);
           }
         }
 
         for (const b of snapshotAll) {
           if (!blockOutputStartRows.has(b.id) && b.outputStartLine > b.startLine) {
             blockOutputStartRows.set(b.id, rowForParserLine(b.outputStartLine));
+          } else if (b.outputStartLine > b.startLine) {
+            const nextOutputStartRow = rowForParserLine(b.outputStartLine);
+            if (blockOutputStartRows.get(b.id) !== nextOutputStartRow) {
+              blockOutputStartRows.set(b.id, nextOutputStartRow);
+            }
           }
         }
 
