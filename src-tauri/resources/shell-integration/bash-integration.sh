@@ -12,7 +12,7 @@ __forge_osc133_preexec() {
   fi
 
   case "${command}" in
-    __forge_osc133_*|history*|builtin\\ history*)
+    __forge_osc133_*|history*|builtin\ history*)
       return
       ;;
   esac
