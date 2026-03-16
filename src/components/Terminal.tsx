@@ -39,6 +39,10 @@ function getCellHeight(terminal: XTerm): number {
   return (terminal.element?.clientHeight || 0) / terminal.rows;
 }
 
+function debugJson(label: string, payload: unknown): void {
+  console.log(label, JSON.stringify(payload));
+}
+
 export default function Terminal(props: TerminalProps) {
   let containerRef: HTMLDivElement | undefined;
   let terminal: XTerm | null = null;
@@ -177,7 +181,7 @@ export default function Terminal(props: TerminalProps) {
           const inputRows = Math.max(1, outputStartRow - startRow);
           const inputHeight = inputRows * cellHeight;
 
-          console.log("[UI]", {
+          debugJson("[UI_JSON]", {
             id: b.id,
             command: b.command,
             startLine: b.startLine,
@@ -335,7 +339,7 @@ export default function Terminal(props: TerminalProps) {
       const snapshotCurrent = blockParser.getCurrentBlock();
       const snapshotAll = [...snapshotBlocks, ...(snapshotCurrent ? [snapshotCurrent] : [])];
 
-      console.log("[QUEUE]", {
+      debugJson("[QUEUE_JSON]", {
         str,
         preWriteRow,
         preFeedLine,
@@ -381,7 +385,7 @@ export default function Terminal(props: TerminalProps) {
 
         for (const b of snapshotAll) {
           const nextStartRow = rowForParserLine(b.startLine);
-          console.log("[ROW_MAP]", {
+          debugJson("[ROW_MAP_JSON]", {
             id: b.id,
             command: b.command,
             startLine: b.startLine,
@@ -397,7 +401,7 @@ export default function Terminal(props: TerminalProps) {
         for (const b of snapshotAll) {
           if (!blockOutputStartRows.has(b.id) && b.outputStartLine > b.startLine) {
             const nextOutputStartRow = rowForParserLine(b.outputStartLine);
-            console.log("[ROW_MAP_OUTPUT]", {
+            debugJson("[ROW_MAP_OUTPUT_JSON]", {
               id: b.id,
               command: b.command,
               outputStartLine: b.outputStartLine,
@@ -407,7 +411,7 @@ export default function Terminal(props: TerminalProps) {
             blockOutputStartRows.set(b.id, nextOutputStartRow);
           } else if (b.outputStartLine > b.startLine) {
             const nextOutputStartRow = rowForParserLine(b.outputStartLine);
-            console.log("[ROW_MAP_OUTPUT]", {
+            debugJson("[ROW_MAP_OUTPUT_JSON]", {
               id: b.id,
               command: b.command,
               outputStartLine: b.outputStartLine,

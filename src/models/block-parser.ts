@@ -57,6 +57,10 @@ function isInternalOscCommand(input: string): boolean {
   return false;
 }
 
+function debugJson(label: string, payload: unknown): void {
+  console.log(label, JSON.stringify(payload));
+}
+
 export class BlockParser {
   private readonly completedBlocks: Block[] = [];
 
@@ -155,7 +159,7 @@ export class BlockParser {
 
     if (marker === "B") {
       const inlineCommand = parts.slice(2).join(";").trim();
-      console.log("[OSC_B]", {
+      debugJson("[OSC_B]", {
         marker,
         lineNumber: this.lineNumber,
         inlineCommand,
@@ -201,7 +205,7 @@ export class BlockParser {
     }
 
     if (marker === "C") {
-      console.log("[OSC_C]", {
+      debugJson("[OSC_C]", {
         marker,
         lineNumber: this.lineNumber,
         state: this.state,
