@@ -39,10 +39,6 @@ function getCellHeight(terminal: XTerm): number {
   return (terminal.element?.clientHeight || 0) / terminal.rows;
 }
 
-function debugJson(label: string, payload: unknown): void {
-  console.log(label, JSON.stringify(payload));
-}
-
 export default function Terminal(props: TerminalProps) {
   let containerRef: HTMLDivElement | undefined;
   let terminal: XTerm | null = null;
@@ -157,7 +153,10 @@ export default function Terminal(props: TerminalProps) {
       if (cellHeight === 0 || Number.isNaN(cellHeight)) return;
 
       const xtermRowEls = terminal.element?.querySelector('.xterm-rows')?.children;
+      const xtermScreen = terminal.element?.querySelector('.xterm-screen') as HTMLElement | null | undefined;
       const containerTop = containerRef?.getBoundingClientRect().top ?? 0;
+      const screenTop = xtermScreen?.getBoundingClientRect().top ?? containerTop;
+      const screenOffsetTop = screenTop - containerTop;
 
       const uiItems: BlockUiItem[] = [];
 
@@ -173,30 +172,13 @@ export default function Terminal(props: TerminalProps) {
         const rowEl = xtermRowEls?.[relIdx] as HTMLElement | undefined;
         const top = rowEl
           ? rowEl.getBoundingClientRect().top - containerTop
-          : relIdx * cellHeight;
+          : screenOffsetTop + relIdx * cellHeight;
         const relativeEndRow = endRow - viewportY;
         const height = (relativeEndRow - relIdx) * cellHeight;
 
-          const outputStartRow = blockOutputStartRows.get(b.id) ?? startRow + 1;
-          const inputRows = Math.max(1, outputStartRow - startRow);
-          const inputHeight = inputRows * cellHeight;
-
-          debugJson("[UI_JSON]", {
-            id: b.id,
-            command: b.command,
-            startLine: b.startLine,
-            outputStartLine: b.outputStartLine,
-            startRow,
-            endRow,
-            outputStartRow,
-            viewportY,
-            relIdx,
-            rowElTop: rowEl?.getBoundingClientRect().top ?? null,
-            containerTop,
-            finalTop: top,
-            height,
-            inputHeight,
-          });
+        const outputStartRow = blockOutputStartRows.get(b.id) ?? startRow + 1;
+        const inputRows = Math.max(1, outputStartRow - startRow);
+        const inputHeight = inputRows * cellHeight;
 
           uiItems.push({
             id: b.id,
@@ -339,20 +321,6 @@ export default function Terminal(props: TerminalProps) {
       const snapshotCurrent = blockParser.getCurrentBlock();
       const snapshotAll = [...snapshotBlocks, ...(snapshotCurrent ? [snapshotCurrent] : [])];
 
-      debugJson("[QUEUE_JSON]", {
-        str,
-        preWriteRow,
-        preFeedLine,
-        blocks: snapshotAll.map((b) => ({
-          id: b.id,
-          command: b.command,
-          startLine: b.startLine,
-          outputStartLine: b.outputStartLine,
-          cachedStartRow: blockStartRows.get(b.id) ?? null,
-          cachedOutputRow: blockOutputStartRows.get(b.id) ?? null,
-        })),
-      });
-
       xterm.write(rawBytes, () => {
         const rowForParserLine = (line: number) => {
           const logicalOffset = line - preFeedLine;
@@ -385,14 +353,6 @@ export default function Terminal(props: TerminalProps) {
 
         for (const b of snapshotAll) {
           const nextStartRow = rowForParserLine(b.startLine);
-          debugJson("[ROW_MAP_JSON]", {
-            id: b.id,
-            command: b.command,
-            startLine: b.startLine,
-            outputStartLine: b.outputStartLine,
-            nextStartRow,
-            previousStartRow: blockStartRows.get(b.id) ?? null,
-          });
           if (blockStartRows.get(b.id) !== nextStartRow) {
             blockStartRows.set(b.id, nextStartRow);
           }
@@ -401,23 +361,9 @@ export default function Terminal(props: TerminalProps) {
         for (const b of snapshotAll) {
           if (!blockOutputStartRows.has(b.id) && b.outputStartLine > b.startLine) {
             const nextOutputStartRow = rowForParserLine(b.outputStartLine);
-            debugJson("[ROW_MAP_OUTPUT_JSON]", {
-              id: b.id,
-              command: b.command,
-              outputStartLine: b.outputStartLine,
-              nextOutputStartRow,
-              previousOutputStartRow: blockOutputStartRows.get(b.id) ?? null,
-            });
             blockOutputStartRows.set(b.id, nextOutputStartRow);
           } else if (b.outputStartLine > b.startLine) {
             const nextOutputStartRow = rowForParserLine(b.outputStartLine);
-            debugJson("[ROW_MAP_OUTPUT_JSON]", {
-              id: b.id,
-              command: b.command,
-              outputStartLine: b.outputStartLine,
-              nextOutputStartRow,
-              previousOutputStartRow: blockOutputStartRows.get(b.id) ?? null,
-            });
             if (blockOutputStartRows.get(b.id) !== nextOutputStartRow) {
               blockOutputStartRows.set(b.id, nextOutputStartRow);
             }

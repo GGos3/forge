@@ -441,4 +441,41 @@ describe("Terminal", () => {
       expect(blocks[1]?.style.top).toBe("51px");
     });
   });
+
+  it("uses xterm-screen offset when row DOM elements are unavailable", async () => {
+    const { container } = render(() =>
+      createComponent(Terminal, { sessionId: { value: "session-9" } as SessionId, focused: false })
+    );
+
+    await waitFor(() => expect(mockState.terminalInstances).toHaveLength(1));
+
+    const terminal = mockState.terminalInstances[0];
+    terminal.buffer.active.cursorY = 0;
+    terminal.element.querySelector = vi.fn((selector: string) => {
+      if (selector === ".xterm-rows") {
+        return { children: [] };
+      }
+      if (selector === ".xterm-screen") {
+        return {
+          getBoundingClientRect: () => ({ top: 59, height: 180 }),
+        };
+      }
+      return null;
+    });
+    terminal.write.mockImplementation((_: Uint8Array, callback?: () => void) => {
+      terminal.buffer.active.cursorY = 1;
+      callback?.();
+    });
+
+    const output = new TextEncoder().encode("\u001b]133;A\u0007\u001b]133;B;echo inline\u0007");
+    mockState.sessionOutputHandler?.({
+      payload: { session_id: "session-9", data: Array.from(output) },
+    });
+
+    await waitFor(() => {
+      const block = container.querySelector(".forge-block-card") as HTMLElement | null;
+      expect(block).not.toBeNull();
+      expect(block?.style.top).toBe("59px");
+    });
+  });
 });
