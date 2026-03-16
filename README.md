@@ -1,7 +1,7 @@
 # Forge Terminal
 
 Forge is a modern desktop terminal built with **Tauri 2 + SolidJS + xterm.js**.
-It combines Warp-style command blocks and split panes with Termius-style terminal workflows.
+It combines block-oriented command workflows, split-pane layouts, and SSH-focused remote sessions in a native desktop app.
 
 ## Current status
 
