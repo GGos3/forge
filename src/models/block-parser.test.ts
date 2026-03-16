@@ -12,7 +12,7 @@ describe("BlockParser", () => {
   it("parses OSC-marked command with multi-line output", () => {
     const parser = new BlockParser();
 
-    parser.feed(`${osc("A")}${osc("B")}echo hello\n${osc("C")}line-1\nline-2\n${osc("D;0")}`);
+    parser.feed(`${osc("A")}~ ❯ echo hello\n${osc("B")}${osc("C")}line-1\nline-2\n${osc("D;0")}`);
 
     const blocks = parser.getBlocks();
     expect(blocks).toHaveLength(1);
@@ -25,7 +25,7 @@ describe("BlockParser", () => {
   it("parses no-output OSC command", () => {
     const parser = new BlockParser();
 
-    parser.feed(`${osc("A")}${osc("B")}true\n${osc("C")}${osc("D;0")}`);
+    parser.feed(`${osc("A")}~ ❯ true\n${osc("B")}${osc("C")}${osc("D;0")}`);
 
     const [block] = parser.getBlocks();
     expect(block.command).toBe("true");
@@ -110,7 +110,7 @@ describe("BlockParser", () => {
   it("captures non-zero exit codes", () => {
     const parser = new BlockParser();
 
-    parser.feed(`${osc("A")}${osc("B")}false\n${osc("C")}${osc("D;1")}`);
+    parser.feed(`${osc("A")}~ ❯ false\n${osc("B")}${osc("C")}${osc("D;1")}`);
 
     const [block] = parser.getBlocks();
     expect(block.command).toBe("false");
@@ -121,7 +121,7 @@ describe("BlockParser", () => {
     const parser = new BlockParser();
 
     parser.feed(
-      `${osc("A")}${osc("B")}echo one\n${osc("C")}one\n${osc("D;0")}${osc("A")}${osc("B")}echo two\n${osc("C")}two\n${osc("D;0")}`
+      `${osc("A")}~ ❯ echo one\n${osc("B")}${osc("C")}one\n${osc("D;0")}${osc("A")}~ ❯ echo two\n${osc("B")}${osc("C")}two\n${osc("D;0")}`
     );
 
     const blocks = parser.getBlocks();
@@ -134,12 +134,23 @@ describe("BlockParser", () => {
     const parser = new BlockParser();
 
     expect(() => parser.feed(`${ESC}]133;B`)).not.toThrow();
-    expect(() => parser.feed(`${osc("A")}${osc("B")}echo ok\n${osc("C")}ok\n${osc("D;0")}`)).not.toThrow();
+    expect(() => parser.feed(`${osc("A")}~ ❯ echo ok\n${osc("B")}${osc("C")}ok\n${osc("D;0")}`)).not.toThrow();
 
     const blocks = parser.getBlocks();
     expect(blocks).toHaveLength(1);
     expect(blocks[0].command).toBe("echo ok");
     expect(blocks[0].output).toBe("ok\n");
+  });
+
+  it("uses the echoed prompt line for non-inline bash OSC commands", () => {
+    const parser = new BlockParser();
+
+    parser.feed(`${osc("A")}~ ❯ pwd\n${osc("B")}${osc("C")}/tmp\n${osc("D;0")}`);
+
+    const [block] = parser.getBlocks();
+    expect(block.command).toBe("pwd");
+    expect(block.startLine).toBe(1);
+    expect(block.outputStartLine).toBe(2);
   });
 
   it("detects prompt boundaries in fallback mode", () => {

@@ -76,6 +76,10 @@ export class BlockParser {
 
   private ignoringOscCommand = false;
 
+  private pendingOscPromptRemainder = "";
+
+  private pendingOscPromptLine: { text: string; lineNumber: number } | null = null;
+
   feed(data: string): void {
     if (this.pendingInput.length > 0 && data.startsWith(OSC_PREFIX)) {
       this.pendingInput = "";
@@ -129,6 +133,8 @@ export class BlockParser {
     this.previousLineBlank = true;
     this.sawOscMarkers = false;
     this.ignoringOscCommand = false;
+    this.pendingOscPromptRemainder = "";
+    this.pendingOscPromptLine = null;
   }
 
   private handleOsc(content: string): void {
@@ -141,6 +147,8 @@ export class BlockParser {
     const marker = parts[1] ?? "";
 
     if (marker === "A") {
+      this.pendingOscPromptRemainder = "";
+      this.pendingOscPromptLine = null;
       this.state = this.currentBlock ? this.state : "idle";
       return;
     }
@@ -156,11 +164,15 @@ export class BlockParser {
       this.ignoringOscCommand = false;
 
       if (!this.currentBlock) {
-        const anchorLine = this.lineNumber;
+        const pendingPrompt = inlineCommand.length === 0 ? this.consumePendingOscPromptLine() : null;
+        const promptCommand = pendingPrompt ? this.extractPromptCommand(pendingPrompt.text) : "";
+        const anchorLine = pendingPrompt?.lineNumber ?? this.lineNumber;
         this.currentBlock = this.createEmptyBlockAt(anchorLine);
 
         if (inlineCommand.length > 0 && this.currentBlock.command.length === 0) {
           this.currentBlock.command = inlineCommand;
+        } else if (promptCommand.length > 0 && this.currentBlock.command.length === 0) {
+          this.currentBlock.command = promptCommand;
         }
       } else {
         if (inlineCommand.length > 0 && this.currentBlock.command.length === 0) {
@@ -217,11 +229,18 @@ export class BlockParser {
   }
 
   private handleOscPlainText(text: string): void {
+    const normalized = normalizeChunk(text);
+
+    if (!this.currentBlock && this.state === "idle") {
+      this.capturePendingOscPrompt(normalized);
+      this.lineNumber += normalized.split("\n").length - 1;
+      return;
+    }
+
     if (!this.currentBlock && this.state !== "idle") {
       this.currentBlock = this.createEmptyBlock();
     }
 
-    const normalized = normalizeChunk(text);
     if (this.currentBlock) {
       if (this.state === "command") {
         this.currentBlock.command += normalized;
@@ -300,6 +319,45 @@ export class BlockParser {
       timestamp: Date.now(),
       source: "osc",
     };
+  }
+
+  private capturePendingOscPrompt(text: string): void {
+    if (text.length === 0) {
+      return;
+    }
+
+    let buffer = `${this.pendingOscPromptRemainder}${text}`;
+    let lineNumber = this.lineNumber;
+
+    while (true) {
+      const newlineIndex = buffer.indexOf("\n");
+      if (newlineIndex === -1) {
+        break;
+      }
+
+      const line = buffer.slice(0, newlineIndex);
+      if (stripAnsi(line).trim().length > 0) {
+        this.pendingOscPromptLine = { text: line, lineNumber };
+      }
+
+      buffer = buffer.slice(newlineIndex + 1);
+      lineNumber += 1;
+    }
+
+    this.pendingOscPromptRemainder = buffer;
+  }
+
+  private consumePendingOscPromptLine(): { text: string; lineNumber: number } | null {
+    const pending = this.pendingOscPromptLine;
+    this.pendingOscPromptLine = null;
+    this.pendingOscPromptRemainder = "";
+    return pending;
+  }
+
+  private extractPromptCommand(line: string): string {
+    const stripped = stripAnsi(line);
+    const match = stripped.match(PROMPT_REGEX);
+    return (match?.[1] ?? "").trim();
   }
 
   private finalizeCurrentBlock(): void {

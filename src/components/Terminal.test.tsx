@@ -314,7 +314,7 @@ describe("Terminal", () => {
     });
 
     const output = new TextEncoder().encode(
-      "\u001b]133;A\u0007\u001b]133;B\u0007echo one\n\u001b]133;C\u0007one\n\u001b]133;D;0\u0007\u001b]133;A\u0007\u001b]133;B\u0007echo two\n\u001b]133;C\u0007two\n\u001b]133;D;0\u0007"
+      "\u001b]133;A\u0007prompt ❯ echo one\n\u001b]133;B\u0007\u001b]133;C\u0007one\n\u001b]133;D;0\u0007\u001b]133;A\u0007prompt ❯ echo two\n\u001b]133;B\u0007\u001b]133;C\u0007two\n\u001b]133;D;0\u0007"
     );
     mockState.sessionOutputHandler?.({
       payload: { session_id: "session-5", data: Array.from(output) },
@@ -429,7 +429,7 @@ describe("Terminal", () => {
     });
 
     const output = new TextEncoder().encode(
-      "\u001b]133;A\u0007\u001b]133;B\u0007echo one\n\u001b]133;C\u0007one\n\u001b]133;D;0\u0007\u001b]133;A\u0007\u001b]133;B\u0007echo two\n\u001b]133;C\u0007two\n\u001b]133;D;0\u0007"
+      "\u001b]133;A\u0007prompt ❯ echo one\n\u001b]133;B\u0007\u001b]133;C\u0007one\n\u001b]133;D;0\u0007\u001b]133;A\u0007prompt ❯ echo two\n\u001b]133;B\u0007\u001b]133;C\u0007two\n\u001b]133;D;0\u0007"
     );
     mockState.sessionOutputHandler?.({
       payload: { session_id: "session-8", data: Array.from(output) },
