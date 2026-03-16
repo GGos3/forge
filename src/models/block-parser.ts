@@ -53,8 +53,6 @@ export class BlockParser {
 
   private sawOscMarkers = false;
 
-  private atLineStart = true;
-
   feed(data: string): void {
     if (this.pendingInput.length > 0 && data.startsWith(OSC_PREFIX)) {
       this.pendingInput = "";
@@ -107,7 +105,6 @@ export class BlockParser {
     this.fallbackRemainder = "";
     this.previousLineBlank = true;
     this.sawOscMarkers = false;
-    this.atLineStart = true;
   }
 
   private handleOsc(content: string): void {
@@ -127,9 +124,7 @@ export class BlockParser {
     if (marker === "B") {
       if (!this.currentBlock) {
         const inlineCommand = parts.slice(2).join(";").trim();
-        const anchorLine = inlineCommand.length > 0 && this.atLineStart
-          ? Math.max(1, this.lineNumber - 1)
-          : this.lineNumber;
+        const anchorLine = this.lineNumber;
         this.currentBlock = this.createEmptyBlockAt(anchorLine);
 
         if (inlineCommand.length > 0 && this.currentBlock.command.length === 0) {
@@ -197,7 +192,6 @@ export class BlockParser {
     }
 
     this.lineNumber += normalized.split("\n").length - 1;
-    this.atLineStart = normalized.endsWith("\n");
   }
 
   private handleFallbackPlainText(text: string): void {

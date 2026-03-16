@@ -328,7 +328,7 @@ describe("Terminal", () => {
     });
   });
 
-  it("maps inline OSC blocks back to the previous row when the cursor already advanced", async () => {
+  it("keeps inline OSC blocks on the advanced cursor row once the command line has moved", async () => {
     const { container } = render(() =>
       createComponent(Terminal, { sessionId: { value: "session-6" } as SessionId, focused: false })
     );
@@ -362,7 +362,7 @@ describe("Terminal", () => {
     await waitFor(() => {
       const block = container.querySelector(".forge-block-card") as HTMLElement | null;
       expect(block).not.toBeNull();
-      expect(block?.style.top).toBe("0px");
+      expect(block?.style.top).toBe("17px");
     });
   });
 

@@ -54,15 +54,29 @@ describe("BlockParser", () => {
     expect(block.output).toBe("done\n");
   });
 
-  it("anchors inline B command blocks to the previous line after an echoed newline", () => {
+  it("anchors inline B command blocks to the current parser line after an echoed newline", () => {
     const parser = new BlockParser();
 
     parser.feed(`echo inline\n${osc("A")}${osc("B;echo inline")}${osc("C")}inline\n${osc("D;0")}`);
 
     const [block] = parser.getBlocks();
     expect(block.command).toBe("echo inline");
-    expect(block.startLine).toBe(1);
+    expect(block.startLine).toBe(2);
     expect(block.endLine).toBe(3);
+  });
+
+  it("keeps consecutive inline B command blocks aligned to each echoed command line", () => {
+    const parser = new BlockParser();
+
+    parser.feed(`${osc("A")}~ ❯ `);
+    parser.feed(`echo one\n${osc("B;echo one")}${osc("C")}one\n${osc("D;0")}`);
+    parser.feed(`${osc("A")}~ ❯ `);
+    parser.feed(`echo two\n${osc("B;echo two")}${osc("C")}two\n${osc("D;0")}`);
+
+    const blocks = parser.getBlocks();
+    expect(blocks).toHaveLength(2);
+    expect(blocks.map((block) => block.command)).toEqual(["echo one", "echo two"]);
+    expect(blocks.map((block) => block.startLine)).toEqual([2, 4]);
   });
 
   it("keeps inline B command blocks on the current line before a newline arrives", () => {
