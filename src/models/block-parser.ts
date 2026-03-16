@@ -178,9 +178,11 @@ export class BlockParser {
       this.ignoringOscCommand = false;
 
       if (!this.currentBlock) {
-        const pendingPrompt = inlineCommand.length === 0 ? this.consumePendingOscPromptLine() : null;
+        const pendingPrompt = this.consumePendingOscPromptLine();
         const promptCommand = pendingPrompt ? this.extractPromptCommand(pendingPrompt.text) : "";
-        const anchorLine = pendingPrompt?.lineNumber ?? this.lineNumber;
+        const anchorLine = pendingPrompt && pendingPrompt.lineNumber === this.lineNumber - 1
+          ? pendingPrompt.lineNumber
+          : this.lineNumber;
         this.currentBlock = this.createEmptyBlockAt(anchorLine);
 
         if (inlineCommand.length > 0 && this.currentBlock.command.length === 0) {

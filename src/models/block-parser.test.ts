@@ -94,7 +94,7 @@ describe("BlockParser", () => {
     const blocks = parser.getBlocks();
     expect(blocks).toHaveLength(2);
     expect(blocks.map((block) => block.command)).toEqual(["echo one", "echo two"]);
-    expect(blocks.map((block) => block.startLine)).toEqual([2, 4]);
+    expect(blocks.map((block) => block.startLine)).toEqual([1, 3]);
   });
 
   it("keeps inline B command blocks on the current line before a newline arrives", () => {
@@ -105,6 +105,17 @@ describe("BlockParser", () => {
     const [block] = parser.getBlocks();
     expect(block.command).toBe("echo inline");
     expect(block.startLine).toBe(1);
+  });
+
+  it("anchors inline bash B commands to the echoed prompt line when it was already rendered", () => {
+    const parser = new BlockParser();
+
+    parser.feed(`${osc("A")}~ ❯ ls\n${osc("B;ls --color=auto")}${osc("C")}file-a\n${osc("D;0")}`);
+
+    const [block] = parser.getBlocks();
+    expect(block.command).toBe("ls --color=auto");
+    expect(block.startLine).toBe(1);
+    expect(block.outputStartLine).toBe(2);
   });
 
   it("captures non-zero exit codes", () => {
