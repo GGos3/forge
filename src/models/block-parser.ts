@@ -36,6 +36,27 @@ function stripAnsi(input: string): string {
   return input.replace(ANSI_ESCAPE_REGEX, "");
 }
 
+function isInternalOscCommand(input: string): boolean {
+  const command = input.trim();
+  if (!command) {
+    return false;
+  }
+
+  if (/^__(?!.*\s)/.test(command)) {
+    return true;
+  }
+
+  if (/^(?:history|builtin\s+history)(?:\s|$)/.test(command)) {
+    return true;
+  }
+
+  if (/^(?:PROMPT_COMMAND|PS1)=/.test(command)) {
+    return true;
+  }
+
+  return false;
+}
+
 export class BlockParser {
   private readonly completedBlocks: Block[] = [];
 
@@ -52,6 +73,8 @@ export class BlockParser {
   private previousLineBlank = true;
 
   private sawOscMarkers = false;
+
+  private ignoringOscCommand = false;
 
   feed(data: string): void {
     if (this.pendingInput.length > 0 && data.startsWith(OSC_PREFIX)) {
@@ -105,6 +128,7 @@ export class BlockParser {
     this.fallbackRemainder = "";
     this.previousLineBlank = true;
     this.sawOscMarkers = false;
+    this.ignoringOscCommand = false;
   }
 
   private handleOsc(content: string): void {
@@ -122,8 +146,16 @@ export class BlockParser {
     }
 
     if (marker === "B") {
+      const inlineCommand = parts.slice(2).join(";").trim();
+      if (isInternalOscCommand(inlineCommand)) {
+        this.ignoringOscCommand = true;
+        this.state = "idle";
+        return;
+      }
+
+      this.ignoringOscCommand = false;
+
       if (!this.currentBlock) {
-        const inlineCommand = parts.slice(2).join(";").trim();
         const anchorLine = this.lineNumber;
         this.currentBlock = this.createEmptyBlockAt(anchorLine);
 
@@ -131,7 +163,6 @@ export class BlockParser {
           this.currentBlock.command = inlineCommand;
         }
       } else {
-        const inlineCommand = parts.slice(2).join(";").trim();
         if (inlineCommand.length > 0 && this.currentBlock.command.length === 0) {
           this.currentBlock.command = inlineCommand;
         }
@@ -142,6 +173,10 @@ export class BlockParser {
     }
 
     if (marker === "C") {
+      if (this.ignoringOscCommand) {
+        return;
+      }
+
       if (!this.currentBlock) {
         this.currentBlock = this.createEmptyBlock();
       }
@@ -151,6 +186,12 @@ export class BlockParser {
     }
 
     if (marker === "D") {
+      if (this.ignoringOscCommand) {
+        this.ignoringOscCommand = false;
+        this.state = "idle";
+        return;
+      }
+
       if (!this.currentBlock) {
         this.state = "idle";
         return;

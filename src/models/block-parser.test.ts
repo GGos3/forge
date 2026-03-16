@@ -54,6 +54,24 @@ describe("BlockParser", () => {
     expect(block.output).toBe("done\n");
   });
 
+  it("ignores internal hook names carried by osc B markers", () => {
+    const parser = new BlockParser();
+
+    parser.feed(`${osc("A")}${osc("B;__sdkman_auto_env")}${osc("C")}startup\n${osc("D;0")}`);
+
+    expect(parser.getBlocks()).toHaveLength(0);
+    expect(parser.getCurrentBlock()).toBeNull();
+  });
+
+  it("ignores prompt management assignments carried by osc B markers", () => {
+    const parser = new BlockParser();
+
+    parser.feed(`${osc("A")}${osc("B;PROMPT_COMMAND=__forge_precmd")}${osc("C")}${osc("D;0")}`);
+
+    expect(parser.getBlocks()).toHaveLength(0);
+    expect(parser.getCurrentBlock()).toBeNull();
+  });
+
   it("anchors inline B command blocks to the current parser line after an echoed newline", () => {
     const parser = new BlockParser();
 
