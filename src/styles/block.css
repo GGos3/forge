@@ -112,6 +112,7 @@
 
 .forge-block-toolbar--visible {
   opacity: 1;
+  pointer-events: auto;
 }
 
 .forge-block-toolbar__info {
