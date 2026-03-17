@@ -7,6 +7,7 @@ import {
   resizePane,
   splitPane,
   splitPaneAt as splitPaneAtModel,
+  swapPanes as swapPanesModel,
 } from "../models/pane-tree";
 import { sessionStore } from "./session";
 import { tabStore } from "./tab";
@@ -190,6 +191,20 @@ export const paneStore = {
     }
 
     const nextTree = resizePane(activeTab.root, splitId, ratio);
+    if (nextTree === activeTab.root) {
+      return;
+    }
+
+    tabStore.setTabPaneTree(activeTab.id, nextTree);
+  },
+
+  swapPanes(idA: PaneId, idB: PaneId): void {
+    const activeTab = tabStore.activeTab;
+    if (!activeTab) {
+      return;
+    }
+
+    const nextTree = swapPanesModel(activeTab.root, idA, idB);
     if (nextTree === activeTab.root) {
       return;
     }

@@ -5,8 +5,9 @@ import type { TabId } from "../types/tab";
 export const FORGE_TAB_MIME = "application/x-forge-tab";
 
 export interface DragSource {
-  type: "tab";
-  tabId: TabId;
+  type: "tab" | "pane";
+  tabId?: TabId;
+  paneId?: PaneId;
 }
 
 export interface DropTarget {
