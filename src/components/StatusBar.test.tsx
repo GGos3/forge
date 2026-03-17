@@ -1,53 +1,56 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@solidjs/testing-library";
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import StatusBar from "./StatusBar";
-import { tabStore } from "../stores/tab";
 
-vi.mock("@tauri-apps/api/core", () => ({
-  invoke: vi.fn(),
+// Mock platform utils - provide default implementation
+vi.mock("../utils/platform", () => ({
+  getCurrentPlatform: vi.fn(() => "linux"),
+  isMacPlatform: vi.fn(() => false),
 }));
+
+// Must import AFTER mock
+import StatusBar from "./StatusBar";
+import { getCurrentPlatform, isMacPlatform } from "../utils/platform";
 
 describe("StatusBar", () => {
   beforeEach(() => {
-    tabStore.reset();
+    vi.mocked(getCurrentPlatform).mockReturnValue("linux");
+    vi.mocked(isMacPlatform).mockReturnValue(false);
   });
 
-  it("renders the status bar", () => {
-    tabStore.createTab();
+  it("renders the shortcut bar", () => {
     render(() => <StatusBar />);
     expect(screen.getByTestId("status-bar")).toBeTruthy();
   });
 
-  it("shows shell label for active tab", () => {
-    tabStore.createTab("bash");
+  it("renders shortcut keys", () => {
     render(() => <StatusBar />);
-    expect(screen.getByTestId("status-bar-shell").textContent).toBe("Bash");
+    const keys = screen.getAllByTestId("shortcut-key");
+    expect(keys.length).toBeGreaterThan(0);
   });
 
-  it("shows default Terminal label when no shell specified", () => {
-    tabStore.createTab();
+  it("shows group separators", () => {
     render(() => <StatusBar />);
-    expect(screen.getByTestId("status-bar-shell").textContent).toBe("Terminal");
+    const container = screen.getByTestId("status-bar");
+    expect(container.textContent).toContain("│");
   });
 
-  it("shows tab count when multiple tabs exist", () => {
-    tabStore.createTab();
-    tabStore.createTab();
-    tabStore.createTab();
-
+  it("shows item separators", () => {
     render(() => <StatusBar />);
-    expect(screen.getByTestId("status-bar-tab-info").textContent).toBe("Tab 3/3");
+    const container = screen.getByTestId("status-bar");
+    expect(container.textContent).toContain("·");
   });
 
-  it("hides tab info when only one tab exists", () => {
-    tabStore.createTab();
+  it("shows Linux shortcuts by default", () => {
     render(() => <StatusBar />);
-    expect(screen.queryByTestId("status-bar-tab-info")).toBeNull();
+    const container = screen.getByTestId("status-bar");
+    expect(container.textContent).toContain("Ctrl");
   });
 
-  it("shows Forge branding", () => {
-    tabStore.createTab();
+  it("shows Mac shortcuts on macOS", () => {
+    vi.mocked(getCurrentPlatform).mockReturnValue("macos");
+    vi.mocked(isMacPlatform).mockReturnValue(true);
     render(() => <StatusBar />);
-    expect(screen.getByTestId("status-bar-channel").textContent).toBe("Forge");
+    const container = screen.getByTestId("status-bar");
+    expect(container.textContent).toContain("⌘");
   });
 });
