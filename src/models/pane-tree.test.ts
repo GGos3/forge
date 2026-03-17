@@ -10,6 +10,7 @@ import {
   resizePane,
   splitPane,
   splitPaneAt,
+  swapPanes,
 } from "./pane-tree";
 
 function makeSession(value: string): SessionId {
@@ -341,6 +342,62 @@ describe("pane-tree model", () => {
       const secondBranch = result.second;
       expect(secondBranch.type).toBe("terminal");
       expect(secondBranch).toBe(c);
+    });
+  });
+
+  describe("swapPanes", () => {
+    it("swaps two terminal panes in a direct split", () => {
+      const left = makeTerminal("left", "session-left");
+      const right = makeTerminal("right", "session-right");
+      const tree: PaneNode = {
+        type: "split",
+        id: "split-root",
+        direction: "vertical",
+        ratio: 0.5,
+        first: left,
+        second: right,
+      };
+
+      const result = swapPanes(tree, "left", "right");
+      expect(result.type).toBe("split");
+      if (result.type !== "split") {
+        return;
+      }
+
+      expect(result.first.type).toBe("terminal");
+      expect(result.second.type).toBe("terminal");
+      if (result.first.type !== "terminal" || result.second.type !== "terminal") {
+        return;
+      }
+
+      expect(result.first.id).toBe("right");
+      expect(result.first.sessionId.value).toBe("session-right");
+      expect(result.second.id).toBe("left");
+      expect(result.second.sessionId.value).toBe("session-left");
+    });
+
+    it("returns same tree when swapping same pane id", () => {
+      const root = makeTerminal("only");
+
+      const result = swapPanes(root, "only", "only");
+      expect(result).toBe(root);
+    });
+
+    it("returns same tree when either pane id does not exist", () => {
+      const tree: PaneNode = {
+        type: "split",
+        id: "split-root",
+        direction: "vertical",
+        ratio: 0.5,
+        first: makeTerminal("left"),
+        second: makeTerminal("right"),
+      };
+
+      const resultA = swapPanes(tree, "left", "missing");
+      const resultB = swapPanes(tree, "missing-a", "missing-b");
+
+      expect(resultA).toBe(tree);
+      expect(resultB).toBe(tree);
     });
   });
 });

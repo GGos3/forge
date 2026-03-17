@@ -194,6 +194,46 @@ export function findPane(tree: PaneNode, paneId: PaneId): PaneNode | null {
   return findPane(tree.first, paneId) ?? findPane(tree.second, paneId);
 }
 
+function replaceNode(tree: PaneNode, targetId: PaneId, replacement: PaneNode): PaneNode {
+  if (tree.id === targetId) {
+    return replacement;
+  }
+
+  if (tree.type !== "split") {
+    return tree;
+  }
+
+  const first = replaceNode(tree.first, targetId, replacement);
+  const second = replaceNode(tree.second, targetId, replacement);
+  if (first === tree.first && second === tree.second) {
+    return tree;
+  }
+
+  return { ...tree, first, second };
+}
+
+export function swapPanes(tree: PaneNode, idA: PaneId, idB: PaneId): PaneNode {
+  if (idA === idB) {
+    return tree;
+  }
+
+  const nodeA = findPane(tree, idA);
+  const nodeB = findPane(tree, idB);
+  if (!nodeA || !nodeB) {
+    return tree;
+  }
+
+  const placeholderId = `__swap_placeholder_${Date.now()}__` as PaneId;
+  const placeholder: PaneNode =
+    nodeA.type === "terminal"
+      ? { type: "terminal", id: placeholderId, sessionId: nodeA.sessionId }
+      : { ...nodeA, id: placeholderId };
+
+  const step1 = replaceNode(tree, idA, placeholder);
+  const step2 = replaceNode(step1, idB, nodeA);
+  return replaceNode(step2, placeholderId, nodeB);
+}
+
 export function getAdjacentPane(tree: PaneNode, paneId: PaneId, direction: FocusDirection): PaneId | null {
   const terminals: TerminalWithRect[] = [];
   collectTerminalRects(tree, { x: 0, y: 0, width: 1, height: 1 }, terminals);
