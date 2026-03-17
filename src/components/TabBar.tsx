@@ -1,7 +1,8 @@
 import { For, Show, createSignal, onCleanup, onMount } from "solid-js";
-import { VsTerminalLinux } from "solid-icons/vs";
+import { VsMenu, VsTerminalLinux } from "solid-icons/vs";
 import { tabStore } from "../stores/tab";
 import { dragStore, FORGE_TAB_MIME } from "../stores/drag";
+import { sidebarStore } from "../stores/sidebar";
 import NewTabDialog from "./NewTabDialog";
 import type { ShellType } from "../types/session";
 import type { TabId } from "../types/tab";
@@ -134,6 +135,14 @@ export default function TabBar() {
   return (
     <>
       <div class="forge-tab-bar" data-testid="tab-bar">
+        <button
+          class="forge-tab-bar__sidebar-toggle"
+          data-testid="sidebar-toggle"
+          title="Toggle Sidebar"
+          onClick={() => sidebarStore.togglePanel()}
+        >
+          <VsMenu size={16} />
+        </button>
         <div class="forge-tab-bar__tabs">
           <For each={tabStore.tabs}>
             {(tab) => (

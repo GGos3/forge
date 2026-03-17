@@ -24,6 +24,27 @@
   gap: 1px;
 }
 
+.forge-tab-bar__sidebar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 100%;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-app-region: no-drag;
+  transition: color var(--duration-fast) var(--ease-default),
+              background-color var(--duration-fast) var(--ease-default);
+}
+
+.forge-tab-bar__sidebar-toggle:hover {
+  color: var(--text-primary);
+  background: var(--surface-2);
+}
+
 .forge-tab {
   position: relative;
   height: 34px;
