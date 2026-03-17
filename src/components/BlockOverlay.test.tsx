@@ -17,7 +17,7 @@ describe("BlockOverlay", () => {
 
     const block1 = screen.getByTestId("block-1");
     expect(block1.style.top).toBe("10px");
-    expect(block1.style.height).toBe("96px");
+    expect(block1.style.height).toBe("60px");
   });
 
   it("shows success icon for exit code 0", () => {

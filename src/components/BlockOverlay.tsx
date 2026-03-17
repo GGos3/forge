@@ -14,7 +14,7 @@ export interface BlockUiItem {
 }
 
 const BLOCK_HEADER_HEIGHT = 36;
-const BLOCK_GAP = 4;
+const BLOCK_GAP = BLOCK_HEADER_HEIGHT + 4;
 
 interface BlockOverlayProps {
   blocks: BlockUiItem[];
