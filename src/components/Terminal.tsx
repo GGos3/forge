@@ -17,6 +17,7 @@ const BLOCK_HEADER_HEIGHT = 28;
 interface TerminalProps {
   sessionId: SessionId;
   focused: boolean;
+  onLastCommand?: (command: string, isRunning: boolean) => void;
 }
 
 const textEncoder = new TextEncoder();
@@ -140,6 +141,7 @@ export default function Terminal(props: TerminalProps) {
     const blockParser = new BlockParser();
     const blockStartRows = new Map<string, number>();
     const blockOutputStartRows = new Map<string, number>();
+    let prevLastCmd = "";
 
     const cursorRow = () => terminal!.buffer.active.baseY + terminal!.buffer.active.cursorY;
 
@@ -198,6 +200,14 @@ export default function Terminal(props: TerminalProps) {
       }
 
       setBlocks(uiItems);
+
+      const lastBlock = uiItems[uiItems.length - 1];
+      const lastCmd = lastBlock?.command ?? "";
+      const lastRunning = lastBlock?.isRunning ?? false;
+      if (lastCmd !== prevLastCmd) {
+        prevLastCmd = lastCmd;
+        props.onLastCommand?.(lastCmd, lastRunning);
+      }
     };
 
     const syncSize = async () => {

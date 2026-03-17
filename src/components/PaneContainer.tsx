@@ -74,9 +74,14 @@ export default function PaneContainer(props: PaneContainerProps) {
 
   const isSelfDrag = (): boolean => {
     const source = dragStore.source;
-    if (!source || source.type !== "tab") return false;
+    if (!source || source.type !== "tab" || !source.tabId) return false;
     const tab = tabStore.tabs.find((t) => t.id === source.tabId);
     return !!tab && tab.root.type === "terminal" && tab.root.id === props.node.id;
+  };
+
+  const hasSplits = () => {
+    const tab = tabStore.tabs.find((t) => t.id === props.tabId);
+    return tab ? tab.root.type === "split" : false;
   };
 
   const handleDragOver = (e: DragEvent) => {
@@ -104,6 +109,19 @@ export default function PaneContainer(props: PaneContainerProps) {
     e.preventDefault();
     const zone = activeZone();
     setActiveZone(null);
+
+    const source = dragStore.source;
+    if (!source) {
+      dragStore.endDrag();
+      return;
+    }
+
+    if (source.type === "pane" && source.paneId && props.node.type === "terminal") {
+      paneStore.swapPanes(source.paneId, props.node.id);
+      dragStore.endDrag();
+      return;
+    }
+
     if (!zone || props.node.type !== "terminal") {
       dragStore.endDrag();
       return;
@@ -133,6 +151,7 @@ export default function PaneContainer(props: PaneContainerProps) {
             tabId={props.tabId}
             paneId={props.node.id}
             focused={props.node.type === "terminal" && paneStore.activePaneId === props.node.id}
+            showHeader={hasSplits()}
           />
           <DropZoneOverlay activeZone={activeZone()} />
         </div>

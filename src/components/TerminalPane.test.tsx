@@ -11,7 +11,12 @@ vi.mock("@tauri-apps/api/core", () => ({
 }));
 
 vi.mock("./Terminal", () => ({
-  default: (props: { sessionId: { value: string }; focused: boolean }) => {
+  default: (props: {
+    sessionId: { value: string };
+    focused: boolean;
+    onLastCommand?: (command: string, isRunning: boolean) => void;
+  }) => {
+    props.onLastCommand?.("", false);
     const element = document.createElement("div");
     element.setAttribute("data-testid", "mock-terminal");
     element.setAttribute("data-focused", String(props.focused));
@@ -43,7 +48,7 @@ describe("TerminalPane", () => {
       .mockResolvedValueOnce("session-123");
 
     const { unmount } = render(() =>
-      createComponent(TerminalPane, { tabId, paneId, focused: true })
+      createComponent(TerminalPane, { tabId, paneId, focused: true, showHeader: false })
     );
 
     expect(screen.getByText("Starting terminal...")).toBeDefined();
@@ -68,7 +73,7 @@ describe("TerminalPane", () => {
     tabStore.setTerminalSessionId(tabId, paneId, { value: "session-existing" } as SessionId);
 
     render(() =>
-      createComponent(TerminalPane, { tabId, paneId, focused: false })
+      createComponent(TerminalPane, { tabId, paneId, focused: false, showHeader: false })
     );
 
     const terminal = await screen.findByTestId("mock-terminal");
@@ -80,7 +85,7 @@ describe("TerminalPane", () => {
     const tabId = tabStore.createTab();
 
     render(() =>
-      createComponent(TerminalPane, { tabId, paneId: "missing-pane", focused: false })
+      createComponent(TerminalPane, { tabId, paneId: "missing-pane", focused: false, showHeader: false })
     );
 
     await waitFor(() => {
@@ -100,7 +105,7 @@ describe("TerminalPane", () => {
 
     tabStore.setTerminalSessionId(tabId, paneId, { value: "session-existing" } as SessionId);
 
-    render(() => createComponent(TerminalPane, { tabId, paneId, focused: false }));
+    render(() => createComponent(TerminalPane, { tabId, paneId, focused: false, showHeader: true }));
 
     const closeButton = await screen.findByTestId(`close-pane-${paneId}`);
     fireEvent.click(closeButton);
