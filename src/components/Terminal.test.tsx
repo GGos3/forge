@@ -295,7 +295,7 @@ describe("Terminal", () => {
     await waitFor(() => {
       const block = container.querySelector(".forge-block-card") as HTMLElement | null;
       expect(block).not.toBeNull();
-      expect(block?.style.top).toBe("-28px");
+      expect(block?.style.top).toBe("0px");
     });
   });
 
@@ -323,8 +323,8 @@ describe("Terminal", () => {
     await waitFor(() => {
       const blocks = Array.from(container.querySelectorAll(".forge-block-card")) as HTMLElement[];
       expect(blocks).toHaveLength(2);
-      expect(blocks[0]?.style.top).toBe("-28px");
-      expect(blocks[1]?.style.top).toBe("6px");
+      expect(blocks[0]?.style.top).toBe("0px");
+      expect(blocks[1]?.style.top).toBe("0px");
     });
   });
 
@@ -362,7 +362,7 @@ describe("Terminal", () => {
     await waitFor(() => {
       const block = container.querySelector(".forge-block-card") as HTMLElement | null;
       expect(block).not.toBeNull();
-      expect(block?.style.top).toBe("-11px");
+      expect(block?.style.top).toBe("0px");
     });
   });
 
@@ -407,7 +407,7 @@ describe("Terminal", () => {
     await waitFor(() => {
       const blocks = Array.from(container.querySelectorAll(".forge-block-card")) as HTMLElement[];
       expect(blocks).toHaveLength(2);
-      expect(blocks[1]?.style.top).toBe("23px");
+      expect(blocks[1]?.style.top).toBe("15px");
     });
   });
 
@@ -438,7 +438,7 @@ describe("Terminal", () => {
     await waitFor(() => {
       const blocks = Array.from(container.querySelectorAll(".forge-block-card")) as HTMLElement[];
       expect(blocks).toHaveLength(2);
-      expect(blocks[1]?.style.top).toBe("23px");
+      expect(blocks[1]?.style.top).toBe("15px");
     });
   });
 
@@ -475,7 +475,7 @@ describe("Terminal", () => {
     await waitFor(() => {
       const block = container.querySelector(".forge-block-card") as HTMLElement | null;
       expect(block).not.toBeNull();
-      expect(block?.style.top).toBe("31px");
+      expect(block?.style.top).toBe("23px");
     });
   });
 });
