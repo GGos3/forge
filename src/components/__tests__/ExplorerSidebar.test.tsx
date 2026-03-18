@@ -224,16 +224,15 @@ describe("App Sidebar Integration", () => {
     expect(screen.queryByTestId("sidebar-panel")).toBeNull();
   });
 
-  it("nav rail is visible when sidebar is open", () => {
+  it("nav rail is always visible", () => {
     render(() => <App />);
-    fireEvent.click(screen.getByTestId("sidebar-toggle"));
     expect(screen.getByTestId("nav-rail")).toBeTruthy();
   });
 
   it("clicking nav item opens corresponding panel", () => {
     render(() => <App />);
 
-    fireEvent.click(screen.getByTestId("sidebar-toggle"));
+    fireEvent.click(screen.getByTestId("nav-explorer"));
     expect(screen.queryByTestId("sidebar-panel")).toBeTruthy();
 
     fireEvent.click(screen.getByTestId("nav-connections"));
@@ -243,7 +242,7 @@ describe("App Sidebar Integration", () => {
   it("clicking same nav item again closes the panel", () => {
     render(() => <App />);
 
-    fireEvent.click(screen.getByTestId("sidebar-toggle"));
+    fireEvent.click(screen.getByTestId("nav-explorer"));
     expect(screen.queryByTestId("sidebar-panel")).toBeTruthy();
 
     fireEvent.click(screen.getByTestId("nav-explorer"));
@@ -253,7 +252,7 @@ describe("App Sidebar Integration", () => {
   it("sidebar panel and nav rail coexist when panel is open", () => {
     render(() => <App />);
 
-    fireEvent.click(screen.getByTestId("sidebar-toggle"));
+    fireEvent.click(screen.getByTestId("nav-explorer"));
     expect(screen.queryByTestId("sidebar-panel")).toBeTruthy();
     expect(screen.getByTestId("nav-rail")).toBeTruthy();
   });
@@ -261,7 +260,7 @@ describe("App Sidebar Integration", () => {
   it("closes sidebar panel on Escape", () => {
     render(() => <App />);
 
-    fireEvent.click(screen.getByTestId("sidebar-toggle"));
+    fireEvent.click(screen.getByTestId("nav-explorer"));
     expect(screen.queryByTestId("sidebar-panel")).toBeTruthy();
 
     fireEvent.keyDown(window, { key: "Escape" });
@@ -272,7 +271,7 @@ describe("App Sidebar Integration", () => {
   it("closes sidebar panel when clicking outside the sidebar", () => {
     render(() => <App />);
 
-    fireEvent.click(screen.getByTestId("sidebar-toggle"));
+    fireEvent.click(screen.getByTestId("nav-explorer"));
     expect(screen.queryByTestId("sidebar-panel")).toBeTruthy();
 
     fireEvent.pointerDown(document.body);

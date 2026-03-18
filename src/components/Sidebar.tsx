@@ -97,10 +97,10 @@ const Sidebar: Component = () => {
   });
 
   return (
-    <Show when={sidebarStore.isPanelOpen}>
-      <div ref={sidebarRef} class="forge-sidebar" data-testid="sidebar">
-        <NavRail />
+    <div ref={sidebarRef} class="forge-sidebar" data-testid="sidebar">
+      <NavRail />
 
+      <Show when={sidebarStore.isPanelOpen}>
         <div
           class="forge-sidebar-panel forge-animate-slide-in-right"
           style={{ width: `${sidebarStore.panelWidth}px` }}
@@ -197,8 +197,8 @@ const Sidebar: Component = () => {
           ratio={0}
           onRatioChange={handlePanelResize}
         />
-      </div>
-    </Show>
+      </Show>
+    </div>
   );
 };
 
