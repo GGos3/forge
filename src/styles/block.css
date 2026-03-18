@@ -15,8 +15,8 @@
   right: 0;
   pointer-events: none;
   border-radius: var(--radius-md);
-  border: 1px solid transparent;
-  border-bottom: 1px solid transparent;
+  border: 1px solid color-mix(in srgb, var(--block-divider) 35%, transparent);
+  border-bottom: 1px solid var(--block-divider);
   background: none;
   transition: background-color var(--duration-fast) var(--ease-default),
               border-color var(--duration-fast) var(--ease-default);
@@ -24,8 +24,6 @@
 
 .forge-block-card--hovered {
   background: var(--block-bg-hover);
-  border-color: color-mix(in srgb, var(--block-divider) 35%, transparent);
-  border-bottom-color: var(--block-divider);
 }
 
 .forge-block-card--success {
@@ -95,19 +93,18 @@
   pointer-events: none;
   position: absolute;
   top: 50%;
-  left: 0;
-  right: 0;
+  left: var(--space-3);
+  right: var(--space-3);
   transform: translateY(-50%);
   display: flex;
   align-items: center;
   gap: 0;
-  padding: 2px var(--space-2);
-  border-radius: 0;
+  padding: 2px var(--space-1);
+  border-radius: var(--radius-sm);
   background: color-mix(in srgb, var(--surface-3) 95%, transparent);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: none;
-  border-bottom: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-subtle);
   max-width: none;
   opacity: 0;
   transition: opacity var(--duration-fast) var(--ease-default);
