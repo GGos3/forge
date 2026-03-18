@@ -12,7 +12,7 @@ import { settingsStore } from "../stores/settings";
 import { showToast } from "./ui/Toast";
 import { getCurrentPlatform, matchesToggleSidebarShortcut } from "../utils/platform";
 
-const BLOCK_HEADER_HEIGHT = 36;
+const BLOCK_HEADER_HEIGHT = 28;
 
 interface TerminalProps {
   sessionId: SessionId;
@@ -186,21 +186,17 @@ export default function Terminal(props: TerminalProps) {
 
         const blockBodyHeight = Math.max(height, cellHeight);
 
-          const rawTop = top - BLOCK_HEADER_HEIGHT;
-          const clampedTop = Math.max(0, rawTop);
-          const clampLoss = clampedTop - rawTop;
-
           uiItems.push({
             id: b.id,
-            top: clampedTop,
-            height: Math.max(cellHeight, blockBodyHeight + BLOCK_HEADER_HEIGHT - clampLoss),
-            inputHeight: Math.min(inputHeight, blockBodyHeight),
-            command: b.command,
-            output: b.output,
-            exitCode: b.exitCode,
-            timestamp: b.timestamp,
-            isRunning: b.id === currentBlock?.id,
-          });
+          top: top - BLOCK_HEADER_HEIGHT,
+          height: blockBodyHeight + BLOCK_HEADER_HEIGHT,
+          inputHeight: Math.min(inputHeight, blockBodyHeight),
+          command: b.command,
+          output: b.output,
+          exitCode: b.exitCode,
+          timestamp: b.timestamp,
+          isRunning: b.id === currentBlock?.id,
+        });
       }
 
       setBlocks(uiItems);

@@ -13,7 +13,7 @@ export interface BlockUiItem {
   isRunning: boolean;
 }
 
-const BLOCK_HEADER_HEIGHT = 36;
+const BLOCK_HEADER_HEIGHT = 28;
 const BLOCK_GAP = 4;
 
 interface BlockOverlayProps {
